@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema(
             unique: true, // Ensure usernames are unique
             trim: true, // Trim whitespace from usernames
             index: true, // Add index on username field
+            lowercase: true, // Convert emails to lowercase
         },
         email: {
             type: String,
@@ -28,7 +29,7 @@ const userSchema = new mongoose.Schema(
         },
         password: {
             type: String,
-            trim: true,
+            trim: true, // Trim whitespace from emails
             required: [true, 'Password is required'], // Custom error message for required field
             minlength: [8, 'Password must be at least 8 characters long'], // Custom error message for minlength validation
             validate: {
@@ -51,7 +52,7 @@ const userSchema = new mongoose.Schema(
         profilePicture: String,
         accountStatus: {
             type: String,
-            enum: ['active', 'inactive', 'banned'],
+            enum: ['active', 'inactive', 'suspended'],
             default: 'active',
         },
         accountRole: {

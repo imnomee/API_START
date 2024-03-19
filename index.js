@@ -1,6 +1,8 @@
 import express from 'express'; // Importing Express framework
 import dotenv from 'dotenv'; // Importing dotenv to load environment variables
 import mongoose from 'mongoose'; // Importing Mongoose for MongoDB interaction
+import asyncHandler from 'express-async-handler';
+import cookieParser from 'cookie-parser';
 
 // Import routes - You should replace this with your actual route files
 import userRoutes from './routes/user.routes.js';
@@ -9,9 +11,10 @@ dotenv.config(); // Loading environment variables from .env file
 const app = express(); // Creating an instance of Express
 
 app.use(express.json()); // Middleware to parse JSON request bodies
+app.use(cookieParser());
 
 // Use routes - Mounting route middleware for user routes
-app.use('/api/users', userRoutes);
+app.use('/api/users', asyncHandler(userRoutes));
 
 const port = process.env.PORT || 5000; // Setting the port for the server to listen on
 
