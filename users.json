@@ -1,0 +1,53 @@
+[
+    {
+        "username": "john_doe",
+        "email": "john@example.com",
+        "password": "johnDoe",
+        "firstName": "John",
+        "lastName": "Doe",
+        "phoneNumber": "1234567890",
+        "profilePicture": "https://example.com/profile.jpg",
+        "lastLoginDate": "2021-07-08T12:15:00.000Z"
+    },
+    {
+        "username": "jane_smith",
+        "email": "jane@example.com",
+        "password": "janeSmith",
+        "firstName": "Jane",
+        "lastName": "Smith",
+        "phoneNumber": "0987654321",
+        "profilePicture": "https://example.com/profile.jpg",
+        "lastLoginDate": "2021-07-08T13:15:00.000Z"
+    },
+    {
+        "username": "emma_brown",
+        "email": "emma@example.com",
+        "password": "emmaBrown",
+        "firstName": "Emma",
+        "lastName": "Brown",
+        "phoneNumber": "1357924680",
+        "profilePicture": "https://example.com/profile.jpg",
+        "accountStatus": "banned",
+        "lastLoginDate": null
+    },
+    {
+        "username": "mike_jackson",
+        "email": "mike@example.com",
+        "password": "mikeJackson",
+        "firstName": "Mike",
+        "lastName": "Jackson",
+        "phoneNumber": "2468013579",
+        "profilePicture": null,
+        "lastLoginDate": "2021-07-08T15:15:00.000Z"
+    },
+    {
+        "username": "sara_adams",
+        "email": "sara@example.com",
+        "password": "saraAdams",
+        "firstName": "Sara",
+        "lastName": "Adams",
+        "phoneNumber": null,
+        "profilePicture": null,
+        "lastLoginDate": null
+    }
+]
