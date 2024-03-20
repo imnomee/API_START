@@ -67,6 +67,12 @@ const userSchema = new mongoose.Schema(
     }
 );
 
+// Method to find a user by username
+userSchema.statics.findByUsername = async function (username) {
+    const user = await this.findOne({ username });
+    return user; // Returns null if user is not found
+};
+
 // Pre-save hook to hash the password before saving
 userSchema.pre('save', async function (next) {
     // Check if the password field has been modified

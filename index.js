@@ -36,7 +36,7 @@ async function startServer() {
 
 // Catch-all route handler for undefined routes
 app.use('*', (req, res, next) => {
-    const error = new Error('Not Found');
+    const error = new Error('Page Not Found');
     error.status = 404;
     next(error);
 });
