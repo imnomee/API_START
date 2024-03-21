@@ -2,9 +2,10 @@ import { Router } from 'express';
 import {
     registerUser,
     loginUser,
+    logoutUser,
     getSingleUser,
     getAllUsers,
-    userProfile,
+    currentUser,
 } from '../controllers/user.controllers.js';
 import {
     adminCheck,
@@ -14,9 +15,10 @@ import {
 const router = Router();
 
 router.post('/register', registerUser); // Route to register a new user
+router.get('/logout', logoutUser); // Route to logout a user
 router.post('/login', loginUser); // Route to register a new user
+router.get('/profile', tokenValidator, currentUser);
 router.get('/', tokenValidator, adminCheck, getAllUsers); // Route to get all users
-router.get('/profile', tokenValidator, userProfile);
 router.get('/:id', getSingleUser);
 
 export default router;

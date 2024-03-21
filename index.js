@@ -1,8 +1,9 @@
 import express from 'express'; // Importing Express framework
 import dotenv from 'dotenv'; // Importing dotenv to load environment variables
 import mongoose from 'mongoose'; // Importing Mongoose for MongoDB interaction
-import asyncHandler from 'express-async-handler';
-import cookieParser from 'cookie-parser';
+import asyncHandler from 'express-async-handler'; // Importing express-async-handler for error handling with async routes
+import cookieParser from 'cookie-parser'; // Importing cookie-parser for handling cookies
+import chalk from 'chalk'; // Importing chalk for colored console logs
 
 // Import routes - You should replace this with your actual route files
 import userRoutes from './routes/user.routes.js';
@@ -11,7 +12,7 @@ dotenv.config(); // Loading environment variables from .env file
 const app = express(); // Creating an instance of Express
 
 app.use(express.json()); // Middleware to parse JSON request bodies
-app.use(cookieParser());
+app.use(cookieParser()); // Middleware to parse cookies
 
 // Use routes - Mounting route middleware for user routes
 app.use('/api/users', asyncHandler(userRoutes));
@@ -26,7 +27,11 @@ async function startServer() {
         console.log('Connected to MongoDB Server'); // Log success message when connected
         // Start the Express server and listen for incoming requests
         app.listen(port, () => {
-            console.log(`Server is running on: ${port}...`); // Log the port the server is running on
+            console.log(
+                chalk.blueBright(
+                    `Server is running on >> http://localhost:${port}...`
+                )
+            );
         });
     } catch (error) {
         console.error('Error connecting to MongoDB:', error); // Log error if MongoDB connection fails
