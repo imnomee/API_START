@@ -1,0 +1,18 @@
+Title: The name or title of the item.
+Description: A detailed description of the item.
+Price: The price at which the item is listed for sale.
+Category: The category or categories to which the item belongs (e.g., Electronics, Clothing, Books).
+Condition: The condition of the item (e.g., New, Used, Refurbished).
+Seller: Information about the user who is selling the item (e.g., username, seller rating).
+Location: The location of the item (e.g., city, country).
+Shipping Options: Information about shipping options (e.g., shipping cost, shipping methods).
+Images: Images of the item to showcase its appearance.
+Quantity: The quantity of the item available for sale.
+Availability: Indicates whether the item is currently available for sale.
+Attributes: Additional attributes specific to the category of the item (e.g., brand, size, color).
+SKU (Stock Keeping Unit): A unique identifier for the item.
+Listing Date: The date and time when the item was listed for sale.
+End Date: For auction-style listings, the date and time when the auction ends.
+Payment Options: Accepted payment methods for purchasing the item.
+Return Policy: Information about the seller's return policy.
+Seller Notes: Additional notes or information provided by the seller.
