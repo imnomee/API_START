@@ -7,7 +7,8 @@
         "lastName": "Doe",
         "phoneNumber": "1234567890",
         "profilePicture": "https://example.com/profile.jpg",
-        "lastLoginDate": "2021-07-08T12:15:00.000Z"
+        "lastLoginDate": "2021-07-08T12:15:00.000Z",
+        "sellerRating": 4.8
     },
     {
         "username": "jane_smith",
@@ -17,7 +18,8 @@
         "lastName": "Smith",
         "phoneNumber": "0987654321",
         "profilePicture": "https://example.com/profile.jpg",
-        "lastLoginDate": "2021-07-08T13:15:00.000Z"
+        "lastLoginDate": "2021-07-08T13:15:00.000Z",
+        "sellerRating": 4.3
     },
     {
         "username": "emma_brown",
@@ -28,7 +30,8 @@
         "phoneNumber": "1357924680",
         "profilePicture": "https://example.com/profile.jpg",
         "accountStatus": "banned",
-        "lastLoginDate": null
+        "lastLoginDate": null,
+        "sellerRating": 2.5
     },
     {
         "username": "mike_jackson",
@@ -38,7 +41,8 @@
         "lastName": "Jackson",
         "phoneNumber": "2468013579",
         "profilePicture": null,
-        "lastLoginDate": "2021-07-08T15:15:00.000Z"
+        "lastLoginDate": "2021-07-08T15:15:00.000Z",
+        "sellerRating": 4.2
     },
     {
         "username": "sara_adams",
@@ -48,6 +52,7 @@
         "lastName": "Adams",
         "phoneNumber": null,
         "profilePicture": null,
-        "lastLoginDate": null
+        "lastLoginDate": null,
+        "sellerRating": 3.5
     }
 ]
