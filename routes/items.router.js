@@ -7,9 +7,10 @@ import {
     updateSingleItem,
 } from '../controllers/items.controller.js';
 import { validateObjectId } from '../middlewares/validation.middleware.js';
+import { validateItemInputs } from '../middlewares/validation.middleware.js';
 const router = Router();
 
-router.route('/').post(createItem).get(getAllItems);
+router.route('/').post(validateItemInputs, createItem).get(getAllItems);
 router
     .route('/:id')
     .all(validateObjectId)

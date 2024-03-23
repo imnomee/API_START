@@ -1,4 +1,9 @@
 import mongoose from 'mongoose';
+import {
+    ITEM_CONDITION,
+    LISTING_DAYS,
+    PAYMENT_OPTIONS,
+} from '../utils/constants.js';
 
 const { Schema, model } = mongoose;
 
@@ -21,8 +26,8 @@ const productSchema = new Schema(
         category: { type: String, required: true }, // Category of the product, required
         condition: {
             type: String,
-            enum: ['used', 'new', 'refurbished'],
-            default: 'used',
+            enum: Object.values(ITEM_CONDITION),
+            default: ITEM_CONDITION.USED,
         }, // Condition of the product with predefined options
         seller: { type: Schema.Types.ObjectId, ref: 'Seller' }, // Reference to the seller of the product
         location: { type: String, required: true }, // Location of the product, required
@@ -34,16 +39,18 @@ const productSchema = new Schema(
             // Attributes for the product
             brand: { type: String, required: true }, // Brand of the product, required
             color: { type: String, required: true }, // Color of the product, required
-            storageCapacity: { type: String, required: true }, // Storage capacity of the product, required
-            screenSize: { type: String }, // Screen size of the product
-            resolution: { type: String }, // Resolution of the product
+        },
+        listingDuration: {
+            type: String,
+            enum: Object.values(LISTING_DAYS),
+            default: LISTING_DAYS.WEEK,
         },
         sku: { type: String, required: true }, // Stock Keeping Unit identifier, required
-        listingDate: { type: Date, required: true }, // Listing date of the product, required
         endDate: { type: Date, required: true }, // End date of the product listing, required
         paymentOptions: {
             type: [String],
-            enum: ['Credit Card', 'PayPal'],
+            enum: Object.values(PAYMENT_OPTIONS),
+            default: PAYMENT_OPTIONS.BANK,
             required: true,
         }, // Payment options with predefined values, required
         returnPolicy: {
