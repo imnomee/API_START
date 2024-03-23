@@ -1,50 +1,39 @@
-import 'express-async-errors'; // Import to handle async errors in Express
+import 'express-async-errors';
 import express from 'express';
-import chalk from 'chalk'; // For colored console output
-import dotenv from 'dotenv'; // For environment variables
-import morgan from 'morgan'; // For logging HTTP requests
-import itemsRouter from './routes/items.router.js'; // Router for items endpoints
-import mongoose from 'mongoose'; // MongoDB ORM
+import chalk from 'chalk';
+import morgan from 'morgan';
+import dotenv from 'dotenv';
+import itemsRouter from './routes/items.router.js';
+import sellerRouter from './routes/sellers.router.js';
+import mongoose from 'mongoose';
+dotenv.config();
 
-dotenv.config(); // Load environment variables from .env file
-const app = express(); // Create Express application
-
-// Middleware to parse JSON bodies of incoming requests
+const app = express();
 app.use(express.json());
-
-// Middleware for HTTP request logging in development environment
 app.use(morgan('dev'));
 
-// Route handler for items endpoints
 app.use('/api/v1/items', itemsRouter);
+app.use('/api/v1/sellers', sellerRouter);
 
-// Middleware for handling 404 errors (Route not found)
-app.use('*', (req, res) => {
-    return res.status(404).json({ error: 'Not Found middleware' });
+app.use('*', (req, res, next) => {
+    return res.status(404).json({ msg: 'not found: 404' });
 });
 
-// Middleware for handling server errors (500 Internal Server Error)
 app.use((err, req, res, next) => {
-    console.error(err);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res
+        .status(500)
+        .json({ msg: 'something went wrong: 500', error: err._message });
 });
 
-const port = process.env.PORT || 5000; // Default port
+const port = process.env.PORT || 5000;
 
-// Connect to MongoDB and start the Express server
-mongoose
-    .connect(process.env.MONGO_URI)
-    .then(() => {
-        // Start the Express server
-        app.listen(port, () => {
-            console.log(
-                `Server is running on\n>> ${chalk.blue(
-                    `http://localhost:${port}`
-                )}...`
-            );
-        });
-    })
-    .catch((error) => {
-        console.error('Error connecting to MongoDB:', error);
-        process.exit(1); // Exit the process with failure status code
+try {
+    await mongoose.connect(process.env.MONGO_URI);
+
+    app.listen(port, () => {
+        console.log(chalk.blue(`http://localhost:${port}/api/v1`));
     });
+} catch (err) {
+    console.log(err);
+    process.exit(1);
+}

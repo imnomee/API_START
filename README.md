@@ -207,27 +207,6 @@ app.delete('/api/v1/jobs/:id', (req, res) => {
 });
 ```
 
-#### Filteration
-
-```js
-//first we build the query
-//1. filtering
-//the params passed in url for query
-const queryObj = { ...req.query };
-const excludedFields = ['page', 'sort', 'limit', 'fields']; //we don't want these fields
-excludedFields.forEach((el) => delete queryObj(el));
-
-//2. advance filtering
-const queryString = JSON.stringify(queryObj);
-
-const query = Job.find(queryObj);
-
-//execute the query
-const jobs = await query;
-
-//send response
-```
-
 #### Not Found Middleware
 
 ```js

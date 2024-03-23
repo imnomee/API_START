@@ -1,101 +1,12 @@
 import mongoose from 'mongoose';
 
-// Destructure the Schema object from mongoose
-const { Schema } = mongoose;
+const { Schema, model } = mongoose;
 
-// Define the schema for the item
-const itemSchema = new Schema(
+// Schema for shipping options with method and cost
+const shippingOptionSchema = new Schema(
     {
-        // Title of the item
-        title: {
-            type: String,
-            required: true,
-            minlength: 10, // Minimum length of 10 characters
-            maxlength: 100, // Maximum length of 100 characters
-            trim: true,
-        },
-        // Description of the item
-        description: {
-            type: String,
-            required: true,
-            minlength: 50, // Minimum length of 50 characters
-            maxlength: 500, // Maximum length of 500 characters
-            trim: true,
-        },
-        // Price of the item
-        price: {
-            type: Number,
-            required: true,
-            min: 0, // Minimum value of 0
-            default: 0, // Default value of 0
-        },
-        // Category of the item
-        category: {
-            type: String,
-            required: true,
-        },
-        // Condition of the item
-        condition: {
-            type: String,
-            enum: ['new', 'used', 'refurb'],
-            default: 'new', // Default value of 'New'
-        },
-        // Seller information
-        seller: {
-            username: { type: String, required: true },
-            sellerRating: { type: Number, required: true },
-        },
-        // Location of the item
-        location: {
-            city: { type: String, default: 'My City' }, // Default value of 'My City'
-            country: { type: String, required: true },
-        },
-        // Shipping options for the item
-        shippingOptions: [
-            {
-                method: { type: String, required: true },
-                cost: { type: Number, required: true },
-            },
-        ],
-        // Images of the item
-        images: [{ type: String, required: true }],
-        // Quantity of the item
-        quantity: {
-            type: Number,
-            min: 0, // Minimum value of 0
-            default: 1, // Default value of 1
-        },
-        // Availability of the item
-        availability: {
-            type: Boolean,
-            default: true, // Default value of true
-        },
-        // Additional attributes of the item
-        attributes: {
-            type: Schema.Types.Mixed,
-        },
-        // Stock Keeping Unit (SKU) of the item
-        sku: {
-            type: String,
-            required: true,
-        },
-        // Accepted payment options for the item
-        paymentOptions: [
-            {
-                type: String,
-                required: true,
-            },
-        ],
-        // Return policy for the item
-        returnPolicy: {
-            type: String,
-            required: true,
-        },
-        // Notes provided by the seller
-        sellerNotes: {
-            type: String,
-            required: true,
-        },
+        method: { type: String, required: true },
+        cost: { type: Number, required: true, min: 0 },
     },
     {
         timestamps: true,
@@ -103,7 +14,87 @@ const itemSchema = new Schema(
     }
 );
 
-// Create the Mongoose model for the item
-const Item = mongoose.model('Item', itemSchema);
+// Main product schema
+const productSchema = new Schema(
+    {
+        // Basic product details
+        title: { type: String, required: true },
+        description: { type: String, required: true },
+        price: { type: Number, required: true, min: 0 },
+        category: { type: String, required: true },
 
-export default Item;
+        // Product condition with predefined options
+        condition: {
+            type: String,
+            enum: ['used', 'new', 'refurbished'],
+            default: 'used',
+        },
+
+        // Embedded seller schema
+        seller: {
+            type: Schema.Types.ObjectId,
+            ref: 'Seller',
+        },
+
+        // Location as a simple string representing the city
+        location: { type: String, required: true },
+
+        // Array of shipping options using the shippingOptionSchema
+        shippingOptions: [shippingOptionSchema],
+
+        // Array of image URLs with validation to ensure they are URLs
+        images: {
+            type: [String],
+            validate: {
+                validator: function (v) {
+                    return v.every((url) => /^(https?:\/\/).+/.test(url));
+                },
+                message: (props) => `${props.value} is not a valid URL!`,
+            },
+        },
+
+        // Quantity available, must be zero or more
+        quantity: { type: Number, required: true, min: 0 },
+
+        // Availability as a boolean, defaults to true
+        availability: { type: Boolean, default: true },
+
+        // Attributes for the product, with some fields required
+        attributes: {
+            brand: { type: String, required: true },
+            color: { type: String, required: true },
+            storageCapacity: { type: String, required: true },
+            screenSize: { type: String },
+            resolution: { type: String },
+        },
+
+        // Stock Keeping Unit identifier, required
+        sku: { type: String, required: true },
+
+        // Listing and end dates for the product availability
+        listingDate: { type: Date, required: true },
+        endDate: { type: Date, required: true },
+
+        // Payment options with predefined values
+        paymentOptions: {
+            type: [String],
+            enum: ['Credit Card', 'PayPal'],
+            required: true,
+        },
+
+        // Return policy as a string, required
+        returnPolicy: { type: String, required: true },
+
+        // Additional notes from the seller, optional
+        sellerNotes: String,
+    },
+    {
+        // Enable timestamps to track creation and update, disable version key
+        timestamps: true,
+        versionKey: false,
+    }
+);
+
+// Export the model to use it in other parts of the application
+const Product = model('Product', productSchema);
+export default Product;

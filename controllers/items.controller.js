@@ -1,71 +1,48 @@
-import Item from '../models/Item.Model.js'; // Importing the Item model
-import { StatusCodes } from 'http-status-codes'; // Importing HTTP status codes
-import { validationResult } from 'express-validator'; // Importing validation result from express-validator
-import { findItemById, fieldsToReturn } from '../services/item.service.js'; // Importing utility functions from item service
+import Item from '../models/Item.Model.js';
 
-// Controller method to get all items
+// Fields to return for each item
+const fieldsToReturn = 'title description price quantity condition';
+
+// Get all items from the database
 export const getAllItems = async (req, res) => {
-    const items = await Item.find({}).select(fieldsToReturn); // Retrieving all items and selecting specific fields
-    return res.status(StatusCodes.OK).json({ data: items }); // Returning items in a consistent response format
+    const items = await Item.find().select(fieldsToReturn);
+    res.status(200).json({ total: items.length, items });
 };
 
-// Controller method to get an item by ID
-export const getItemById = async (req, res) => {
-    const item = await findItemById(req.params.id); // Finding item by ID
+// Get a single item by ID
+export const getSingleItem = async (req, res) => {
+    const item = await Item.findById(req.params.id).select(fieldsToReturn);
     if (!item) {
-        return res
-            .status(StatusCodes.NOT_FOUND)
-            .json({ error: `No item found with ID: ${req.params.id}` }); // Handling not found case
+        res.status(404).json({ msg: 'Item not found' });
+    } else {
+        res.status(200).json({ msg: 'Item found', item });
     }
-    return res.status(StatusCodes.OK).json({ data: item }); // Returning item in a consistent response format
 };
 
-// Controller method to delete an item by ID
-export const deleteItemById = async (req, res) => {
-    const item = await findItemById(req.params.id); // Finding item by ID
+// Update a single item by ID
+export const updateSingleItem = async (req, res) => {
+    const item = await Item.findByIdAndUpdate(req.params.id, req.body, {
+        new: true,
+    });
     if (!item) {
-        return res
-            .status(StatusCodes.NOT_FOUND)
-            .json({ error: `No item found with ID: ${req.params.id}` }); // Handling not found case
+        res.status(404).json({ msg: 'Item not found' });
+    } else {
+        res.status(200).json({ msg: 'Item updated', item });
     }
-    await item.remove(); // Removing the item
-    return res
-        .status(StatusCodes.OK)
-        .json({ data: item, message: 'Item removed' }); // Returning success message
 };
 
-// Controller method to update an item by ID
-export const updateItemById = async (req, res) => {
-    const errors = validationResult(req); // Validating request body
-    if (!errors.isEmpty()) {
-        return res
-            .status(StatusCodes.BAD_REQUEST)
-            .json({ errors: errors.array() }); // Handling validation errors
-    }
-    const item = await findItemById(req.params.id); // Finding item by ID
+// Delete a single item by ID
+export const deleteSingleItem = async (req, res) => {
+    const item = await Item.findByIdAndDelete(req.params.id);
     if (!item) {
-        return res
-            .status(StatusCodes.NOT_FOUND)
-            .json({ error: `No item found with ID: ${req.params.id}` }); // Handling not found case
+        res.status(404).json({ msg: 'Item not found' });
+    } else {
+        res.status(200).json({ msg: 'Item deleted', item });
     }
-    Object.assign(item, req.body); // Updating the item with request body
-    await item.save(); // Saving the updated item
-    return res
-        .status(StatusCodes.OK)
-        .json({ data: item, message: 'Item updated' }); // Returning success message
 };
 
-// Controller method to create a new item
+// Create a new item
 export const createItem = async (req, res) => {
-    const errors = validationResult(req); // Validating request body
-    if (!errors.isEmpty()) {
-        return res
-            .status(StatusCodes.BAD_REQUEST)
-            .json({ errors: errors.array() }); // Handling validation errors
-    }
-    const item = new Item(req.body); // Creating a new item instance
-    await item.save(); // Saving the new item
-    return res
-        .status(StatusCodes.CREATED)
-        .json({ data: item, message: 'Item created' }); // Returning success message
+    const item = await Item.create(req.body);
+    res.status(200).json({ msg: 'Item created', item });
 };
