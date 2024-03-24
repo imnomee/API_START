@@ -185,6 +185,47 @@ export const validateNewUserInputs = withValidationErrors([
         .withMessage('Last login date must be a valid date'),
 ]);
 
+// export const validateUpdateUserInputs = withValidationErrors([
+//     // Validation rule for username
+//     body('username')
+//         .trim()
+//         .notEmpty()
+//         .withMessage('Username is required')
+//         .custom(async (value) => {
+//             // Check if a seller with the same username already exists
+//             const existingSeller = await Seller.findOne({ username: value });
+//             if (existingSeller) {
+//                 throw new BadRequestError('Username is already in use');
+//             }
+//         }),
+
+//     // Validation rule for seller rating (optional)
+//     body('sellerRating')
+//         .optional()
+//         .isFloat({ min: 0, max: 5 })
+//         .withMessage('Seller rating must be a number between 0 and 5'),
+
+//     // Validation rule for email
+//     body('email')
+//         .trim()
+//         .notEmpty()
+//         .withMessage('Email is required')
+//         .isEmail()
+//         .withMessage('Valid email address is required')
+//         .custom(async (email, { req }) => {
+//             const user = await Seller.findOne({ email });
+//             if (user && user._id.toString() !== req.user.userId) {
+//                 throw new Error('email already exists');
+//             }
+//         }),
+
+//     // Validation rule for first name
+//     body('firstName').trim().notEmpty().withMessage('First name is required'),
+
+//     // Validation rule for last name
+//     body('lastName').trim().notEmpty().withMessage('Last name is required'),
+// ]);
+
 export const validateUserLogin = withValidationErrors([
     body('email')
         .notEmpty()

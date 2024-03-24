@@ -1412,6 +1412,18 @@ const logout = (req, res) => {
     });
     res.status(StatusCodes.OK).json({ msg: 'user logged out!' });
 };
+
+//////another approach
+
+export const logoutSeller = async (req, res) => {
+    // Clear the token by setting its expiration date to a date in the past
+    res.clearCookie('token');
+
+    // Return success response
+    return res
+        .status(StatusCodes.OK)
+        .json({ msg: 'User logged out successfully' });
+};
 ```
 
 routes/authRouter.js
