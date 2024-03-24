@@ -29,7 +29,7 @@ const productSchema = new Schema(
             enum: Object.values(ITEM_CONDITION),
             default: ITEM_CONDITION.USED,
         }, // Condition of the product with predefined options
-        seller: { type: Schema.Types.ObjectId, ref: 'Seller' }, // Reference to the seller of the product
+        seller: { type: Schema.Types.ObjectId, ref: 'Seller', required: true }, // Reference to the seller of the product
         location: { type: String, required: true }, // Location of the product, required
         shippingOptions: [shippingOptionSchema], // Array of shipping options using the shippingOptionSchema
         images: { type: [String], default: [] }, // Array of image URLs, default empty array

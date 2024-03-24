@@ -1,12 +1,13 @@
 import mongoose from 'mongoose';
 import Seller from '../models/Seller.Model.js';
-import { BadRequestError } from '../errors/custom.errors.js';
+import { BadRequestError, UnauthorizedError } from '../errors/custom.errors.js';
 import { body, validationResult } from 'express-validator';
 import {
     ITEM_CONDITION,
     LISTING_DAYS,
     PAYMENT_OPTIONS,
 } from '../utils/constants.js';
+import jwt from 'jsonwebtoken';
 
 // Middleware to validate ObjectId
 export const validateObjectId = (req, res, next) => {
@@ -191,3 +192,17 @@ export const validateUserLogin = withValidationErrors([
         .withMessage('Please provide valid email'),
     body('password').notEmpty().withMessage('Password is required'),
 ]);
+
+export const authenticateUser = async (req, res, next) => {
+    const { token } = req.cookies;
+    if (!token)
+        throw new UnauthorizedError('No token found. Please Login again');
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (!decoded) throw new UnauthorizedError('Invalid token');
+
+    const { userId, role } = decoded;
+    req.user = { userId, role };
+    next();
+};

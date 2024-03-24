@@ -5,15 +5,23 @@ import {
     getAllItems,
     getSingleItem,
     updateSingleItem,
+    getCurrentUserItems,
 } from '../controllers/items.controller.js';
-import { validateObjectId } from '../middlewares/validation.middleware.js';
-import { validateItemInputs } from '../middlewares/validation.middleware.js';
+import {
+    validateItemInputs,
+    authenticateUser,
+    validateObjectId,
+} from '../middlewares/validation.middleware.js';
 const router = Router();
 
-router.route('/').post(validateItemInputs, createItem).get(getAllItems);
+router
+    .route('/')
+    .post(authenticateUser, validateItemInputs, createItem)
+    .get(getAllItems);
+router.get('/current', authenticateUser, getCurrentUserItems);
 router
     .route('/:id')
-    .all(validateObjectId)
+    .all(validateObjectId, authenticateUser)
     .put(validateItemInputs, updateSingleItem)
     .get(getSingleItem)
     .delete(deleteSingleItem);

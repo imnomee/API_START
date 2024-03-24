@@ -7,6 +7,7 @@ import 'express-async-errors'; // Simplifies error handling for async functions
 import { StatusCodes } from 'http-status-codes';
 import itemsRouter from './routes/items.router.js';
 import sellerRouter from './routes/sellers.router.js';
+import cookieParser from 'cookie-parser';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -17,6 +18,7 @@ const app = express();
 // Middleware setup
 app.use(express.json()); // Parse incoming JSON requests
 app.use(morgan('dev')); // Log HTTP requests to the console
+app.use(cookieParser());
 
 // Routes setup
 app.use('/api/v1/items', itemsRouter); // Items router

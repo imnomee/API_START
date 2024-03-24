@@ -1,5 +1,8 @@
-// Fields to return for each item
-export const FIELDS = 'title description price quantity condition';
+// ITEM_FIELDS to return for each item
+export const ITEM_FIELDS = 'title description price quantity condition';
+
+export const USER_FIELDS =
+    'username sellerRating email firstName lastName accountRole';
 
 export const ITEM_CONDITION = {
     USED: 'used',
