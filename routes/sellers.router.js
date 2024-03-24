@@ -3,12 +3,19 @@ import {
     createSeller,
     getAllSellers,
     getSingleSeller,
+    loginSeller,
 } from '../controllers/sellers.controller.js';
-import { validateObjectId } from '../middlewares/validation.middleware.js';
-import { getSingleItem } from '../controllers/items.controller.js';
+import {
+    validateObjectId,
+    validateNewUserInputs,
+    validateUserLogin,
+} from '../middlewares/validation.middleware.js';
+
 const router = Router();
 
-router.route('/').post(createSeller).get(getAllSellers);
+router.post('/register', validateNewUserInputs, createSeller);
+router.post('/login', validateUserLogin, loginSeller);
+router.route('/').get(getAllSellers);
 router.route('/:id').all(validateObjectId).get(getSingleSeller);
 
 export default router;

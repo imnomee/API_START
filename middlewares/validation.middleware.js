@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import Seller from '../models/Seller.Model.js';
 import { BadRequestError } from '../errors/custom.errors.js';
 import { body, validationResult } from 'express-validator';
 import {
@@ -69,8 +70,10 @@ export const validateItemInputs = withValidationErrors([
         .toDate()
         .withMessage('End date must be a valid date'),
     body('paymentOptions')
-        .isArray({ min: 1 })
-        .withMessage('Payment options are required'),
+        .trim()
+        .notEmpty()
+        .isIn(Object.values(PAYMENT_OPTIONS))
+        .withMessage(`Invalid Option: ${Object.values(PAYMENT_OPTIONS)}`),
     body('returnPolicy')
         .trim()
         .notEmpty()
@@ -109,4 +112,82 @@ export const validateItemInputs = withValidationErrors([
             }
             return true;
         }),
+]);
+
+export const validateNewUserInputs = withValidationErrors([
+    // Validation rule for username
+    body('username')
+        .trim()
+        .notEmpty()
+        .withMessage('Username is required')
+        .custom(async (value) => {
+            // Check if a seller with the same username already exists
+            const existingSeller = await Seller.findOne({ username: value });
+            if (existingSeller) {
+                throw new BadRequestError('Username is already in use');
+            }
+        }),
+
+    // Validation rule for seller rating (optional)
+    body('sellerRating')
+        .optional()
+        .isFloat({ min: 0, max: 5 })
+        .withMessage('Seller rating must be a number between 0 and 5'),
+
+    // Validation rule for email
+    body('email')
+        .trim()
+        .notEmpty()
+        .withMessage('Email is required')
+        .isEmail()
+        .withMessage('Valid email address is required')
+        .custom(async (value) => {
+            // Check if a seller with the same email already exists
+            const existingEmail = await Seller.findOne({ email: value });
+            if (existingEmail) {
+                throw new BadRequestError('Email is already in use');
+            }
+        }),
+
+    // Validation rule for password
+    body('password').trim().notEmpty().withMessage('Password is required'),
+
+    // Validation rule for first name
+    body('firstName').trim().notEmpty().withMessage('First name is required'),
+
+    // Validation rule for last name
+    body('lastName').trim().notEmpty().withMessage('Last name is required'),
+
+    // Validation rule for phone number
+    body('phoneNumber')
+        .trim()
+        .notEmpty()
+        .withMessage('Phone number is required')
+        .custom(async (value) => {
+            // Check if a seller with the same phone number already exists
+            const existingPhoneNumber = await Seller.findOne({
+                phoneNumber: value,
+            });
+            if (existingPhoneNumber) {
+                throw new BadRequestError('Phone number is already in use');
+            }
+        }),
+
+    // Validation rule for profile picture (optional)
+    body('profilePicture').optional().trim(),
+
+    // Validation rule for last login date (optional)
+    body('lastLoginDate')
+        .optional()
+        .isISO8601()
+        .toDate()
+        .withMessage('Last login date must be a valid date'),
+]);
+
+export const validateUserLogin = withValidationErrors([
+    body('email')
+        .notEmpty()
+        .isEmail()
+        .withMessage('Please provide valid email'),
+    body('password').notEmpty().withMessage('Password is required'),
 ]);

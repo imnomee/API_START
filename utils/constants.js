@@ -20,3 +20,8 @@ export const LISTING_DAYS = {
     WEEK: 'week',
     MONTH: 'month',
 };
+
+export const ACCOUNT_ROLES = {
+    ADMIN: 'admin',
+    USER: 'user',
+};

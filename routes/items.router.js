@@ -14,7 +14,7 @@ router.route('/').post(validateItemInputs, createItem).get(getAllItems);
 router
     .route('/:id')
     .all(validateObjectId)
-    .put(updateSingleItem)
+    .put(validateItemInputs, updateSingleItem)
     .get(getSingleItem)
     .delete(deleteSingleItem);
 
