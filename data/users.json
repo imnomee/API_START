@@ -30,7 +30,6 @@
         "phoneNumber": "1357924680",
         "profilePicture": "https://example.com/profile.jpg",
         "accountStatus": "banned",
-        "lastLoginDate": null,
         "sellerRating": 2.5
     },
     {
@@ -41,7 +40,6 @@
         "lastName": "Jackson",
         "phoneNumber": "2468013579",
         "profilePicture": null,
-        "lastLoginDate": "2021-07-08T15:15:00.000Z",
         "sellerRating": 4.2
     },
     {

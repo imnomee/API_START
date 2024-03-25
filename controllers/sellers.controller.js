@@ -12,6 +12,7 @@ const determineAccountRole = async () => {
     // Return 'admin' if it's the first account, else return 'user'
     return isFirstAccount ? 'admin' : 'user';
 };
+import Item from '../models/Item.Model.js';
 
 // Create a new seller
 export const createSeller = async (req, res) => {
@@ -117,11 +118,6 @@ export const getCurrentUser = async (req, res) => {
     return res.status(StatusCodes.OK).json({ msg: 'user found', seller });
 };
 
-// Route to get application statistics (for admin)
-export const getApplicationStats = async (req, res) => {
-    return res.status(StatusCodes.OK).json('get application stats');
-};
-
 // Route to update current user details
 export const updateCurrentUser = async (req, res) => {
     // Extract fields from request body that need to be updated
@@ -169,4 +165,12 @@ export const updateCurrentUser = async (req, res) => {
     return res
         .status(StatusCodes.OK)
         .json({ msg: 'User updated', seller: updatedSeller });
+};
+
+// Route to get application statistics (for admin)
+export const getApplicationStats = async (req, res) => {
+    const totalSellers = await Seller.countDocuments();
+    const totalProducts = await Item.countDocuments();
+
+    return res.status(StatusCodes.OK).json({ totalProducts, totalSellers });
 };

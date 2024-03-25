@@ -24,15 +24,20 @@ const sellerSchema = new mongoose.Schema(
         lastName: { type: String, required: true },
 
         // Phone number of the seller
-        phoneNumber: { type: String, required: true, unique: true },
+        phoneNumber: {
+            type: String,
+            required: true,
+            unique: true,
+            default: '000000000',
+        },
 
         // URL to the seller's profile picture
         profilePicture: { type: String },
 
         // Date of the seller's last login
-        lastLoginDate: { type: Date },
+        lastLoginDate: { type: Date, default: new Date(Date.now()) },
 
-        //Account Role
+        // Account Role
         accountRole: {
             type: String,
             enum: Object.values(ACCOUNT_ROLES),

@@ -18,10 +18,20 @@ export const getSingleItem = async (req, res) => {
 
 // Update a single item by ID
 export const updateSingleItem = async (req, res) => {
-    const item = await Item.findByIdAndUpdate(req.params.id, req.body, {
-        new: true,
-    }).select(ITEM_FIELDS);
+    const item = await Item.findById(req.params.id);
     if (!item) throw new NotFoundError(`No item with id: ${req.params.id}`);
+
+    // Check if the user is an admin or the owner of the item
+    const isAdmin = req.user.role === 'admin';
+    const isOwner = req.user.userId === item.seller.toString();
+
+    if (!isAdmin && !isOwner) {
+        // If user is not authorized to delete the item, throw UnauthorizedError
+        throw new UnauthorizedError('You cannot edit this item.');
+    }
+
+    await item.updateOne(req.body);
+
     res.status(StatusCodes.OK).json({ msg: 'Item updated', item });
 };
 

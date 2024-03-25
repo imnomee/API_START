@@ -1,1586 +1,741 @@
-#### Setup Server
+## Description
+
+This project aims to build a web application for managing items and sellers in an online marketplace.
 
-npm init -y
-node index
+## Features
+
+-   **Item Management**: Allows users to create, update, delete, and view items.
+-   **Seller Management**: Enables registration, login, logout, and profile management for sellers.
+-   **Authentication & Authorization**: Provides user authentication using JWT tokens and role-based access control.
+-   **Validation Middleware**: Validates incoming requests using express-validator middleware.
+-   **Error Handling**: Implements global error handling for both synchronous and asynchronous functions.
+-   **Database Integration**: Utilizes MongoDB for data storage and mongoose for object modeling.
 
--   to make the server use import instead of require
--   in the package.json add
+## Installation
 
-"type": "module",
+1. Clone the repository:
 
--   don't forget about .js extension
--   for named imports, names must match
+    ```bash
+    git clone https://github.com/your/repository.git
+    ```
 
-#### Source Control
+2. Install dependencies:
 
--   create .gitignore
--   create Github Repo (optional)
+    ```bash
+    cd project-folder
+    npm install
+    ```
 
-#### Setup Basic Express
+3. Set up environment variables:
 
-```sh
-npm i express
-```
-
--   install express
--   setup a basic server which listening on PORT=5100
--   create a basic home route which sends back "hello world"
-
-[Express Docs](https://expressjs.com/)
-
-```js
-import express from 'express';
-const app = express();
-
-app.get('/', (req, res) => {
-    res.send('Hello World');
-});
-
-app.listen(5100, () => {
-    console.log('server running....');
-});
-```
-
-package.json
-
-```json
-"scripts": {
-    "dev": "nodemon index.js"
-  },
-```
-
-#### Accept JSON
-
-Setup express middleware to accept json
-
-index.js
-
-```js
-app.use(express.json());
-```
-
-#### Thunder Client
-
-[Thunder Client](https://www.thunderclient.com/)
-
--   install and test home route
-
-index.js
-
-```js
-app.post('/', (req, res) => {
-    console.log(req);
-
-    res.json({ message: 'Data received', data: req.body });
-});
-```
-
-#### Morgan and Dotenv
-
-[Morgan](https://www.npmjs.com/package/morgan)
-
-HTTP request logger middleware for node.js
-
-[Dotenv](https://www.npmjs.com/package/dotenv)
-
-Dotenv is a zero-dependency module that loads environment variables from a .env file into process.env.
-
-```sh
-npm i morgan@1.10.0 dotenv@16.0.3
-```
-
-```js
-import morgan from 'morgan';
-
-app.use(morgan('dev'));
-```
-
--   create .env file in the root
--   add PORT and NODE_ENV
--   add .env to .gitignore
-
-index.js
-
-```js
-import * as dotenv from 'dotenv';
-dotenv.config();
-
-const port = process.env.PORT || 5100;
-app.listen(port, () => {
-    console.log(`server running on PORT ${port}....`);
-});
-```
-
-#### Basic CRUD
-
--   create jobs array where each item is an object with following properties
-    id, company, position
--   create routes to handle - create, read, update and delete functionalities
-
-#### Get All Jobs
-
-[Nanoid](https://www.npmjs.com/package/nanoid)
-
-The nanoid package is a software library used for generating unique and compact identifiers in web applications or databases. It creates short and URL-safe IDs by combining random characters from a set of 64 characters. Nanoid is a popular choice due to its simplicity, efficiency, and collision-resistant nature.
-
-```sh
-npm i nanoid@4.0.2
-```
-
-index.js
-
-```js
-import { nanoid } from 'nanoid';
-
-let jobs = [
-    { id: nanoid(), company: 'apple', position: 'front-end' },
-    { id: nanoid(), company: 'google', position: 'back-end' },
-];
-
-app.get('/api/v1/jobs', (req, res) => {
-    res.status(200).json({ jobs });
-});
-```
-
-#### Create, FindOne, Modify and Delete
-
-```js
-// CREATE JOB
-
-app.post('/api/v1/jobs', (req, res) => {
-    const { company, position } = req.body;
-    if (!company || !position) {
-        return res
-            .status(400)
-            .json({ msg: 'please provide company and position' });
-    }
-    const id = nanoid(10);
-    // console.log(id);
-    const job = { id, company, position };
-    jobs.push(job);
-    res.status(200).json({ job });
-});
-
-// GET SINGLE JOB
-
-app.get('/api/v1/jobs/:id', (req, res) => {
-    const { id } = req.params;
-    const job = jobs.find((job) => job.id === id);
-    if (!job) {
-        return res.status(404).json({ msg: `no job with id ${id}` });
-    }
-    res.status(200).json({ job });
-});
-
-// EDIT JOB
-
-app.patch('/api/v1/jobs/:id', (req, res) => {
-    const { company, position } = req.body;
-    if (!company || !position) {
-        return res
-            .status(400)
-            .json({ msg: 'please provide company and position' });
-    }
-    const { id } = req.params;
-    const job = jobs.find((job) => job.id === id);
-    if (!job) {
-        return res.status(404).json({ msg: `no job with id ${id}` });
-    }
-
-    job.company = company;
-    job.position = position;
-    res.status(200).json({ msg: 'job modified', job });
-});
-
-// DELETE JOB
-
-app.delete('/api/v1/jobs/:id', (req, res) => {
-    const { id } = req.params;
-    const job = jobs.find((job) => job.id === id);
-    if (!job) {
-        return res.status(404).json({ msg: `no job with id ${id}` });
-    }
-    const newJobs = jobs.filter((job) => job.id !== id);
-    jobs = newJobs;
-
-    res.status(200).json({ msg: 'job deleted' });
-});
-```
-
-#### Not Found Middleware
-
-```js
-app.use('*', (req, res) => {
-    res.status(404).json({ msg: 'not found' });
-});
-```
-
-#### Error Middleware
-
-```js
-app.use((err, req, res, next) => {
-    console.log(err);
-    res.status(500).json({ msg: 'something went wrong' });
-});
-```
-
-#### Not Found and Error Middleware
-
-The "not found" middleware in Express.js is used when a request is made to a route that does not exist. It catches these requests and responds with a 404 status code, indicating that the requested resource was not found.
-
-On the other hand, the "error" middleware in Express.js is used to handle any errors that occur during the processing of a request. It is typically used to catch unexpected errors or exceptions that are not explicitly handled in the application code. It logs the error and sends a 500 status code, indicating an internal server error.
-
-In summary, the "not found" middleware is specifically designed to handle requests for non-existent routes, while the "error" middleware is a catch-all for handling unexpected errors that occur during request processing.
-
--   make a request to "/jobss"
-
-```js
-// GET ALL JOBS
-app.get('/api/v1/jobs', (req, res) => {
-    // console.log(jobss);
-    res.status(200).json({ jobs });
-});
-
-// GET SINGLE JOB
-app.get('/api/v1/jobs/:id', (req, res) => {
-    const { id } = req.params;
-    const job = jobs.find((job) => job.id === id);
-    if (!job) {
-        throw new Error('no job with that id');
-        return res.status(404).json({ msg: `no job with id ${id}` });
-    }
-    res.status(200).json({ job });
-});
-```
-
-#### Controller and Router
-
-setup controllers and router
-
-controllers/jobController.js
-
-```js
-import { nanoid } from 'nanoid';
-
-export const getAllJobs = async (req, res) => {
-    res.status(200).json({ jobs });
-};
-```
-
-routes/jobRouter.js
-
-```js
-import { Router } from 'express';
-const router = Router();
-
-export default router;
-```
-
-index.js
-
-```js
-import jobRouter from './routers/jobRouter.js';
-app.use('/api/v1/jobs', jobRouter);
-```
-
-#### MongoDB
-
-[MongoDb](https://www.mongodb.com/)
-
-#### Mongoosejs
-
-[Mongoose](https://mongoosejs.com/)
-
-Mongoose is an Object Data Modeling (ODM) library for Node.js that provides a straightforward and elegant way to interact with MongoDB. It allows developers to define schemas and models for their data, providing structure and validation. Mongoose also offers features like data querying, middleware, and support for data relationships, making it a powerful tool for building MongoDB-based applications.
-
-```sh
-npm i mongoose@7.0.5
-```
-
-index.js
-
-```js
-import mongoose from 'mongoose';
-
-try {
-    await mongoose.connect(process.env.MONGO_URL);
-    app.listen(port, () => {
-        console.log(`server running on PORT ${port}....`);
-    });
-} catch (error) {
-    console.log(error);
-    process.exit(1);
-}
-```
-
-#### Job Model
-
-models/JobModel.js
-
-enum - data type represents a field with a predefined set of values
-
-```js
-import mongoose from 'mongoose';
-
-const JobSchema = new mongoose.Schema(
-    {
-        company: String,
-        position: String,
-        jobStatus: {
-            type: String,
-            enum: ['interview', 'declined', 'pending'],
-            default: 'pending',
-        },
-        jobType: {
-            type: String,
-            enum: ['full-time', 'part-time', 'internship'],
-            default: 'full-time',
-        },
-        jobLocation: {
-            type: String,
-            default: 'my city',
-        },
-    },
-    { timestamps: true }
-);
-
-export default mongoose.model('Job', JobSchema);
-```
-
-#### Create Job
-
-jobController.js
-
-```js
-import Job from '../models/JobModel.js';
-
-export const createJob = async (req, res) => {
-    const { company, position } = req.body;
-    const job = await Job.create({ company, position });
-    res.status(201).json({ job });
-};
-```
-
-#### Try / Catch
-
-jobController.js
-
-```js
-export const createJob = async (req, res) => {
-    const { company, position } = req.body;
-    try {
-        const job = await Job.create('something');
-        res.status(201).json({ job });
-    } catch (error) {
-        res.status(500).json({ msg: 'server error' });
-    }
-};
-```
-
-#### express-async-errors
-
-The "express-async-errors" package is an Express.js middleware that helps handle errors that occur within asynchronous functions. It catches unhandled errors inside async/await functions and forwards them to Express.js's error handling middleware, preventing the Node.js process from crashing. It simplifies error handling in Express.js applications by allowing you to write asynchronous code without worrying about manually catching and forwarding errors.
-
-[Express Async Errors](https://www.npmjs.com/package/express-async-errors)
-
-```sh
-npm i express-async-errors@3.1.1
-```
-
--   setup import at the top !!!
-
-    server.js
-
-```js
-import 'express-async-errors';
-```
-
-jobController.js
-
-```js
-export const createJob = async (req, res) => {
-    const { company, position } = req.body;
-
-    const job = await Job.create({ company, position });
-    res.status(201).json({ job });
-};
-```
-
-#### Get All Jobs
-
-jobController.js
+    Create a `.env` file in the root directory and add the following variables:
 
-```js
-export const getAllJobs = async (req, res) => {
-    const jobs = await Job.find({});
-    res.status(200).json({ jobs });
-};
-```
-
-#### Get Single Job
-
-```js
-export const getJob = async (req, res) => {
-    const { id } = req.params;
-    const job = await Job.findById(id);
-    if (!job) {
-        return res.status(404).json({ msg: `no job with id ${id}` });
-    }
-    res.status(200).json({ job });
-};
-```
-
-#### Delete Job
-
-jobController.js
-
-```js
-export const deleteJob = async (req, res) => {
-    const { id } = req.params;
-    const removedJob = await Job.findByIdAndDelete(id);
-
-    if (!removedJob) {
-        return res.status(404).json({ msg: `no job with id ${id}` });
-    }
-    res.status(200).json({ job: removedJob });
-};
-```
-
-#### Update Job
-
-```js
-export const updateJob = async (req, res) => {
-    const { id } = req.params;
-
-    const updatedJob = await Job.findByIdAndUpdate(id, req.body, {
-        new: true,
-    });
-
-    if (!updatedJob) {
-        return res.status(404).json({ msg: `no job with id ${id}` });
-    }
-
-    res.status(200).json({ job: updatedJob });
-};
-```
-
-#### Status Codes
-
-[Http Status Codes](https://www.npmjs.com/package/http-status-codes)
-
-```sh
-npm i http-status-codes@2.2.0
-
-```
-
-200 OK OK
-201 CREATED Created
-
-400 BAD_REQUEST Bad Request
-401 UNAUTHORIZED Unauthorized
-
-403 FORBIDDEN Forbidden
-404 NOT_FOUND Not Found
-
-500 INTERNAL_SERVER_ERROR Internal Server Error
-
--   refactor 200 response in all controllers
-
-jobController.js
-
-```js
-res.status(StatusCodes.OK).json({ jobs });
-```
+    ```plaintext
+    PORT=5000
+    MONGO_URI=mongodb://localhost:27017/database
+    JWT_SECRET=your_secret_key
+    ```
 
-createJob
+4. Run the application:
 
-```js
-res.status(StatusCodes.CREATED).json({ job });
-```
-
-#### Custom Error Class
-
-jobController
-
-```js
-export const getJob = async (req, res) => {
-  ....
-  if (!job) {
-    throw new Error('no job with that id');
-    // return res.status(404).json({ msg: `no job with id ${id}` });
-  }
-  ...
-};
-
-```
-
-errors/customErrors.js
-
-```js
-import { StatusCodes } from 'http-status-codes';
-export class NotFoundError extends Error {
-    constructor(message) {
-        super(message);
-        this.name = 'NotFoundError';
-        this.statusCode = StatusCodes.NOT_FOUND;
-    }
-}
-```
-
-#### Custom Error
-
-jobController.js
+    ```bash
+    npm start
+    ```
 
-```js
-import { NotFoundError } from '../customErrors.js';
+## File Structure
 
-if (!job) throw new NotFoundError(`no job with id : ${id}`);
 ```
-
-middleware/errorHandlerMiddleware.js
-
-```js
-import { StatusCodes } from 'http-status-codes';
-
-const errorHandlerMiddleware = (err, req, res, next) => {
-    console.log(err);
-    const statusCode = err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
-    const msg = err.message || 'Something went wrong, try again later';
-
-    res.status(statusCode).json({ msg });
-};
-
-export default errorHandlerMiddleware;
+.
+├── controllers
+│   ├── items.controller.js
+│   └── sellers.controller.js
+├── errors
+│   └── custom.errors.js
+├── middlewares
+│   └── validation.middleware.js
+├── models
+│   ├── Item.Model.js
+│   └── Seller.Model.js
+├── routes
+│   ├── items.router.js
+│   └── sellers.router.js
+├── utils
+│   └── constants.js
+├── index.js
+├── package.json
+└── README.md
 ```
-
-index.js
-
-```js
-import errorHandlerMiddleware from './middleware/errorHandlerMiddleware.js';
 
-app.use(errorHandlerMiddleware);
-```
+## Dependencies
 
-#### Bad Request Error
-
-400 BAD_REQUEST Bad Request
-401 UNAUTHORIZED Unauthorized
-403 FORBIDDEN Forbidden
-404 NOT_FOUND Not Found
-
-customErrors.js
-
-```js
-export class BadRequestError extends Error {
-    constructor(message) {
-        super(message);
-        this.name = 'BadRequestError';
-        this.statusCode = StatusCodes.BAD_REQUEST;
-    }
-}
-export class UnauthenticatedError extends Error {
-    constructor(message) {
-        super(message);
-        this.name = 'UnauthenticatedError';
-        this.statusCode = StatusCodes.UNAUTHORIZED;
-    }
-}
-export class UnauthorizedError extends Error {
-    constructor(message) {
-        super(message);
-        this.name = 'UnauthorizedError';
-        this.statusCode = StatusCodes.FORBIDDEN;
-    }
-}
-```
+-   express
+-   morgan
+-   dotenv
+-   mongoose
+-   chalk
+-   express-async-errors
+-   http-status-codes
 
-#### Validation Layer
+## Usage
 
-[Express Validator](https://express-validator.github.io/docs/)
+### Items
 
-```sh
-npm i express-validator@7.0.1
-```
+-   **Create Item**: `POST /api/v1/items`
+-   **Get All Items**: `GET /api/v1/items`
+-   **Get Current User Items**: `GET /api/v1/items/current`
+-   **Get Single Item**: `GET /api/v1/items/:id`
+-   **Update Single Item**: `PUT /api/v1/items/:id`
+-   **Delete Single Item**: `DELETE /api/v1/items/:id`
 
-#### Test Route
+### Sellers
 
-server.js
+-   **Register Seller**: `POST /api/v1/sellers/register`
+-   **Login Seller**: `POST /api/v1/sellers/login`
+-   **Logout Seller**: `GET /api/v1/sellers/logout`
+-   **Get All Sellers**: `GET /api/v1/sellers`
+-   **Get Single Seller**: `GET /api/v1/sellers/:id`
+-   **Get Current User**: `GET /api/v1/sellers/self/profile`
+-   **Update Current User**: `PUT /api/v1/sellers/self/profile`
+-   **Get Application Stats**: `GET /api/v1/sellers/admin/stats`
 
-```js
-app.post('/api/v1/test', (req, res) => {
-    const { name } = req.body;
-    res.json({ msg: `hello ${name}` });
-});
-```
+## Constants
 
-#### Express Validator
-
-```js
-import { body, validationResult } from 'express-validator';
-
-app.post(
-    '/api/v1/test',
-    [body('name').notEmpty().withMessage('name is required')],
-    (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            const errorMessages = errors.array().map((error) => error.msg);
-            return res.status(400).json({ errors: errorMessages });
-        }
-        next();
-    },
-    (req, res) => {
-        const { name } = req.body;
-        res.json({ msg: `hello ${name}` });
-    }
-);
-```
+-   **ITEM_FIELDS**: Fields to return for each item.
+-   **USER_FIELDS**: Fields to return for each seller.
+-   **ITEM_CONDITION**: Enum representing item conditions.
+-   **PAYMENT_OPTIONS**: Enum representing payment options.
+-   **LISTING_DAYS**: Enum representing listing durations.
+-   **ACCOUNT_ROLES**: Enum representing account roles.
 
-#### Validation Middleware
-
-middleware/validationMiddleware.js
-
-```js
-import { body, validationResult } from 'express-validator';
-import { BadRequestError } from '../errors/customErrors';
-const withValidationErrors = (validateValues) => {
-    return [
-        validateValues,
-        (req, res, next) => {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                const errorMessages = errors.array().map((error) => error.msg);
-                throw new BadRequestError(errorMessages);
-            }
-            next();
-        },
-    ];
-};
-
-export const validateTest = withValidationErrors([
-    body('name')
-        .notEmpty()
-        .withMessage('name is required')
-        .isLength({ min: 3, max: 50 })
-        .withMessage('name must be between 3 and 50 characters long')
-        .trim(),
-]);
-```
+## License
 
-#### Remove Test Case From Server
-
-#### Setup Constants
-
-utils/constants.js
-
-```js
-export const JOB_STATUS = {
-    PENDING: 'pending',
-    INTERVIEW: 'interview',
-    DECLINED: 'declined',
-};
-
-export const JOB_TYPE = {
-    FULL_TIME: 'full-time',
-    PART_TIME: 'part-time',
-    INTERNSHIP: 'internship',
-};
-
-export const JOB_SORT_BY = {
-    NEWEST_FIRST: 'newest',
-    OLDEST_FIRST: 'oldest',
-    ASCENDING: 'a-z',
-    DESCENDING: 'z-a',
-};
-```
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-models/JobModel.js
-
-```js
-import mongoose from 'mongoose';
-import { JOB_STATUS, JOB_TYPE } from '../utils/constants';
-const JobSchema = new mongoose.Schema(
-    {
-        company: String,
-        position: String,
-        jobStatus: {
-            type: String,
-            enum: Object.values(JOB_STATUS),
-            default: JOB_STATUS.PENDING,
-        },
-        jobType: {
-            type: String,
-            enum: Object.values(JOB_TYPE),
-            default: JOB_TYPE.FULL_TIME,
-        },
-        jobLocation: {
-            type: String,
-            default: 'my city',
-        },
-    },
-    { timestamps: true }
-);
-```
+---
 
-#### Validate Create Job
-
-validationMiddleware.js
-
-```js
-import { JOB_STATUS, JOB_TYPE } from '../utils/constants.js';
-
-export const validateJobInput = withValidationErrors([
-    body('company').notEmpty().withMessage('company is required'),
-    body('position').notEmpty().withMessage('position is required'),
-    body('jobLocation').notEmpty().withMessage('job location is required'),
-    body('jobStatus')
-        .isIn(Object.values(JOB_STATUS))
-        .withMessage('invalid status value'),
-    body('jobType')
-        .isIn(Object.values(JOB_TYPE))
-        .withMessage('invalid job type'),
-]);
-```
+This README provides an overview of the project, including its description, features, installation instructions, file structure, dependencies, usage instructions, constants, and license information.
 
-```js
-import { validateJobInput } from '../middleware/validationMiddleware.js';
-
-router.route('/').get(getAllJobs).post(validateJobInput, createJob);
-router
-    .route('/:id')
-    .get(getJob)
-    .patch(validateJobInput, updateJob)
-    .delete(deleteJob);
-```
+# index.js
 
--   create job request
-
-```json
-{
-    "company": "coding addict",
-    "position": "backend-end",
-    "jobStatus": "pending",
-    "jobType": "full-time",
-    "jobLocation": "florida"
-}
-```
+This file serves as the entry point for the application, configuring the server, middleware, routes, and error handling.
 
-#### Validate ID Parameter
+## Dependencies:
 
-validationMiddleware.js
+-   **express**: Web application framework for Node.js.
+-   **morgan**: HTTP request logger middleware for Node.js.
+-   **dotenv**: Loads environment variables from a `.env` file.
+-   **mongoose**: MongoDB object modeling tool designed to work in an asynchronous environment.
+-   **chalk**: Library for styling terminal strings.
+-   **express-async-errors**: Simplifies error handling for asynchronous functions.
+-   **http-status-codes**: Library providing HTTP status code constants.
 
-```js
-import mongoose from 'mongoose';
+## Initialization:
 
-import { param } from 'express-validator';
+1. **Load Environment Variables**: Loads environment variables from the `.env` file using `dotenv.config()`.
 
-export const validateIdParam = withValidationErrors([
-    param('id')
-        .custom((value) => mongoose.Types.ObjectId.isValid(value))
-        .withMessage('invalid MongoDB id'),
-]);
-```
+2. **Initialize Express App**: Creates an instance of the Express application.
 
-```js
-export const validateIdParam = withValidationErrors([
-    param('id').custom(async (value) => {
-        const isValidId = mongoose.Types.ObjectId.isValid(value);
-        if (!isValidId) throw new BadRequestError('invalid MongoDB id');
-        const job = await Job.findById(value);
-        if (!job) throw new NotFoundError(`no job with id : ${value}`);
-    }),
-]);
-```
+## Middleware Setup:
 
-```js
-import { body, param, validationResult } from 'express-validator';
-import { BadRequestError, NotFoundError } from '../errors/customErrors.js';
-import { JOB_STATUS, JOB_TYPE } from '../utils/constants.js';
-import mongoose from 'mongoose';
-import Job from '../models/JobModel.js';
-
-const withValidationErrors = (validateValues) => {
-    return [
-        validateValues,
-        (req, res, next) => {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                const errorMessages = errors.array().map((error) => error.msg);
-                if (errorMessages[0].startsWith('no job')) {
-                    throw new NotFoundError(errorMessages);
-                }
-                throw new BadRequestError(errorMessages);
-            }
-            next();
-        },
-    ];
-};
-```
+-   **express.json()**: Middleware to parse incoming JSON requests.
+-   **morgan('dev')**: Middleware to log HTTP requests to the console in the 'dev' format.
+-   **cookieParser()**: Middleware to parse cookies attached to the request headers.
 
--   remove NotFoundError from getJob, updateJob, deleteJob controllers
-
-#### Clean DB
-
-#### User Model
-
-models/UserModel.js
-
-```js
-import mongoose from 'mongoose';
-
-const UserSchema = new mongoose.Schema({
-    name: String,
-    email: String,
-    password: String,
-    lastName: {
-        type: String,
-        default: 'lastName',
-    },
-    location: {
-        type: String,
-        default: 'my city',
-    },
-    role: {
-        type: String,
-        enum: ['user', 'admin'],
-        default: 'user',
-    },
-});
-
-export default mongoose.model('User', UserSchema);
-```
+## Routes Setup:
 
-#### User Controller and Router
+-   **Items Router**: Mounts the `itemsRouter` at the `/api/v1/items` endpoint.
+-   **Sellers Router**: Mounts the `sellerRouter` at the `/api/v1/sellers` endpoint.
 
-controllers/authController.js
+## Error Handling:
 
-```js
-export const register = async (req, res) => {
-    res.send('register');
-};
-export const login = async (req, res) => {
-    res.send('register');
-};
-```
+-   **Unknown Routes**: Middleware to handle unknown routes, responding with a 404 Not Found status.
+-   **Global Error Handler**: Middleware to handle errors globally, logging the error and sending an appropriate error response.
 
-routers/authRouter.js
+## Server Startup:
 
-```js
-import { Router } from 'express';
-import { register, login } from '../controllers/authController.js';
-const router = Router();
+1. **Connect to MongoDB Database**: Attempts to connect to the MongoDB database using the provided `MONGO_URI` environment variable.
 
-router.post('/register', register);
-router.post('/login', login);
+2. **Start Listening on Port**: Starts the Express server listening on the specified port (`PORT` environment variable or default to `5000`).
 
-export default router;
-```
+## Error Handling on Server Startup:
 
-server.js
+-   If an error occurs during database connection, it is logged, and the process exits with a non-zero status code.
 
-```js
-import authRouter from './routers/authRouter.js';
+## Logging:
 
-app.use('/api/v1/auth', authRouter);
-```
+-   Server startup information, including the server URL, is logged to the console using `chalk.blue()` for styling.
 
-#### Create User - Initial Setup
+# constants.js
 
-authController.js
+This file defines various constants used throughout the application.
 
-```js
-import { StatusCodes } from 'http-status-codes';
-import User from '../models/UserModel.js';
+## Constants:
 
-export const register = async (req, res) => {
-    const user = await User.create(req.body);
-    res.status(StatusCodes.CREATED).json({ user });
-};
-```
+### `ITEM_FIELDS`
 
--   register user request
-
-```json
-{
-    "name": "john",
-    "email": "john@gmail.com",
-    "password": "secret123",
-    "lastName": "smith",
-    "location": "my city"
-}
-```
+-   **Description:** Fields to return for each item.
+-   **Value:** `'title description price quantity condition'`.
 
-#### Validate User
-
-validationMiddleware.js
-
-```js
-import User from '../models/UserModel.js';
-
-export const validateRegisterInput = withValidationErrors([
-    body('name').notEmpty().withMessage('name is required'),
-    body('email')
-        .notEmpty()
-        .withMessage('email is required')
-        .isEmail()
-        .withMessage('invalid email format')
-        .custom(async (email) => {
-            const user = await User.findOne({ email });
-            if (user) {
-                throw new BadRequestError('email already exists');
-            }
-        }),
-    body('password')
-        .notEmpty()
-        .withMessage('password is required')
-        .isLength({ min: 8 })
-        .withMessage('password must be at least 8 characters long'),
-    body('location').notEmpty().withMessage('location is required'),
-    body('lastName').notEmpty().withMessage('last name is required'),
-]);
-```
+### `USER_FIELDS`
 
-authRouter.js
+-   **Description:** Fields to return for each seller.
+-   **Value:** `'username sellerRating email firstName lastName accountRole'`.
 
-```js
-import { validateRegisterInput } from '../middleware/validationMiddleware.js';
+### `ITEM_CONDITION`
 
-router.post('/register', validateRegisterInput, register);
-```
+-   **Description:** Enum representing item conditions.
+-   **Values:**
+    -   `USED`: 'used'
+    -   `NEW`: 'new'
+    -   `REFURB`: 'refurbrished'
 
-#### Admin Role
+### `PAYMENT_OPTIONS`
 
-authController.js
+-   **Description:** Enum representing payment options.
+-   **Values:**
+    -   `CREDIT_CARD`: 'credit_card'
+    -   `PAYPAL`: 'paypal'
+    -   `EASYPAISA`: 'easypaisa'
+    -   `JAZZCASH`: 'jazzcash'
+    -   `BANK`: 'bank'
 
-```js
-// first registered user is an admin
-const isFirstAccount = (await User.countDocuments()) === 0;
-req.body.role = isFirstAccount ? 'admin' : 'user';
+### `LISTING_DAYS`
 
-const user = await User.create(req.body);
-```
+-   **Description:** Enum representing listing durations.
+-   **Values:**
+    -   `THREE`: 'three'
+    -   `WEEK`: 'week'
+    -   `MONTH`: 'month'
 
-#### Hash Passwords
+### `ACCOUNT_ROLES`
 
-[bcryptjs](https://www.npmjs.com/package/bcryptjs)
+-   **Description:** Enum representing account roles.
+-   **Values:**
+    -   `ADMIN`: 'admin'
+    -   `USER`: 'user'
 
-```sh
-npm i bcryptjs@2.4.3
+## Usage:
 
-```
+-   These constants are used throughout the application to maintain consistency and avoid hardcoding values.
+-   They are particularly useful for specifying field selections, enum values, and role definitions.
 
-authController.js
+## Export:
 
-```js
-import bcrypt from 'bcryptjs';
+-   **Each constant** is exported individually for use in other parts of the application.
 
-const register = async (req, res) => {
-    // a random value that is added to the password before hashing
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(req.body.password, salt);
-    req.body.password = hashedPassword;
+# sellers.router.js
 
-    const user = await User.create(req.body);
-};
-```
+This file defines the Express router for handling seller-related routes in the application.
 
-const salt = await bcrypt.genSalt(10);
-This line generates a random "salt" value that will be used to hash the password. A salt is a random value that is added to the password before hashing, which helps to make the resulting hash more resistant to attacks like dictionary attacks and rainbow table attacks. The genSalt() function in bcrypt generates a random salt value using a specified "cost" value. The cost value determines how much CPU time is needed to calculate the hash, and higher cost values result in stronger hashes that are more resistant to attacks.
+## Dependencies:
 
-In this example, a cost value of 10 is used to generate the salt. This is a good default value that provides a good balance between security and performance. However, you may need to adjust the cost value based on the specific needs of your application.
+-   **express**: Web framework for Node.js.
 
-const hashedPassword = await bcrypt.hash(password, salt);
-This line uses the generated salt value to hash the password. The hash() function in bcrypt takes two arguments: the password to be hashed, and the salt value to use for the hash. It then calculates the hash value using a one-way hash function and the specified salt value.
+## Routes:
 
-The resulting hash value is a string that represents the hashed password. This string can then be stored in a database or other storage mechanism to be compared against the user's password when they log in.
+### `router.post('/register')`
 
-By using a salt value and a one-way hash function, bcrypt helps to ensure that user passwords are stored securely and are resistant to attacks like password cracking and brute-force attacks.
+-   **Description:** Route for registering a new seller.
+-   **Method:**
+    -   `POST`: Registers a new seller after validating input.
+-   **Middleware:**
+    -   `validateNewUserInputs`: Validates the input data before registering the seller.
 
-##### BCRYPT VS BCRYPTJS
+### `router.post('/login')`
 
-bcrypt and bcryptjs are both popular libraries for hashing passwords in Node.js applications. However, bcryptjs is considered to be a better choice for a few reasons:
+-   **Description:** Route for logging in a seller.
+-   **Method:**
+    -   `POST`: Logs in a seller after validating login credentials.
+-   **Middleware:**
+    -   `validateUserLogin`: Validates the login credentials before logging in the seller.
 
-Cross-platform compatibility: bcrypt is a native Node.js module that uses C++ bindings, which can make it difficult to install and use on some platforms. bcryptjs, on the other hand, is a pure JavaScript implementation that works on any platform.
+### `router.get('/logout')`
 
-Security: While both bcrypt and bcryptjs use the same underlying algorithm for hashing passwords, bcryptjs is designed to be more resistant to certain types of attacks, such as side-channel attacks.
+-   **Description:** Route for logging out a seller.
+-   **Method:**
+    -   `GET`: Logs out the currently authenticated seller.
 
-Ease of use: bcryptjs has a simpler and more intuitive API than bcrypt, which can make it easier to use and integrate into your application.
+### `router.get('/')`
 
-Overall, while bcrypt and bcryptjs are both good choices for hashing passwords in Node.js applications, bcryptjs is considered to be a better choice for its cross-platform compatibility, improved security, ease of use, and ongoing maintenance.
+-   **Description:** Route for getting all sellers.
+-   **Method:**
+    -   `GET`: Retrieves all sellers.
+-   **Middleware:**
+    -   `authenticateUser`: Authenticates the user before retrieving all sellers.
 
-#### Setup Password Utils
+### `router.route('/:id')`
 
-utils/passwordUtils.js
+-   **Description:** Route for getting a single seller by ID.
+-   **Method:**
+    -   `GET`: Retrieves a single seller by ID.
+-   **Middleware:**
+    -   `validateObjectId`: Validates the object ID parameter.
 
-```js
-import bcrypt from 'bcryptjs';
+### `router.route('/self/profile')`
 
-export async function hashPassword(password) {
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-    return hashedPassword;
-}
-```
+-   **Description:** Route for getting the profile of the currently authenticated seller and updating it.
+-   **Methods:**
+    -   `GET`: Retrieves the profile of the currently authenticated seller.
+    -   `PUT`: Updates the profile of the currently authenticated seller.
+-   **Middleware:**
+    -   `authenticateUser`: Authenticates the user before accessing their profile.
+    -   `updateCurrentUser`: Validates and updates the profile of the currently authenticated seller.
 
-authController.js
+### `router.get('/admin/stats')`
 
-```js
-import { hashPassword } from '../utils/passwordUtils.js';
+-   **Description:** Route for getting application statistics.
+-   **Method:**
+    -   `GET`: Retrieves application statistics.
+-   **Middleware:**
+    -   `authenticateUser`: Authenticates the user before retrieving application statistics.
+    -   `authorizePermissions('admin')`: Authorizes access for admin users only.
 
-const register = async (req, res) => {
-    const hashedPassword = await hashPassword(req.body.password);
-    req.body.password = hashedPassword;
+## Usage:
 
-    const user = await User.create(req.body);
-    res.status(StatusCodes.CREATED).json({ msg: 'user created' });
-};
-```
+-   The routes defined in this file handle seller-related operations such as registration, login, logout, profile management, and statistics retrieval.
+-   Middleware functions ensure authentication, input validation, object ID validation, and authorization for secure and reliable operations.
 
-#### Login User
+## Export:
 
--   login user request
+-   **`router`**: The Express router configured with seller-related routes.
+-   **Usage:** Exported to be mounted in the main application file for routing seller requests.
 
-```json
-{
-    "email": "john@gmail.com",
-    "password": "secret123"
-}
-```
+# items.router.js
 
-validationMiddleware.js
-
-```js
-export const validateLoginInput = withValidationErrors([
-    body('email')
-        .notEmpty()
-        .withMessage('email is required')
-        .isEmail()
-        .withMessage('invalid email format'),
-    body('password').notEmpty().withMessage('password is required'),
-]);
-```
+This file defines the Express router for handling item-related routes in the application.
 
-authRouter.js
+## Dependencies:
 
-```js
-import { validateLoginInput } from '../middleware/validationMiddleware.js';
+-   **express**: Web framework for Node.js.
 
-router.post('/login', validateLoginInput, login);
-```
+## Routes:
 
-#### Unauthenticated Error
+### `router.route('/')`
 
-authController.js
+-   **Description:** Route for creating a new item and getting all items.
+-   **Methods:**
+    -   `POST`: Creates a new item after authenticating the user and validating input.
+    -   `GET`: Retrieves all items.
+-   **Middleware:**
+    -   `authenticateUser`: Authenticates the user before creating a new item.
+    -   `validateItemInputs`: Validates the input data before creating a new item.
 
-```js
-import { UnauthenticatedError } from '../errors/customErrors.js';
+### `router.get('/current')`
 
-const login = async (req, res) => {
-    // check if user exists
-    // check if password is correct
+-   **Description:** Route for getting items created by the current user.
+-   **Method:**
+    -   `GET`: Retrieves items created by the current authenticated user.
+-   **Middleware:**
+    -   `authenticateUser`: Authenticates the user before retrieving their items.
 
-    const user = await User.findOne({ email: req.body.email });
-    if (!user) throw new UnauthenticatedError('invalid credentials');
+### `router.route('/:id')`
 
-    res.send('login route');
-};
-```
+-   **Description:** Route for getting, updating, and deleting a single item by ID.
+-   **Methods:**
+    -   `PUT`: Updates a single item by ID after validating input.
+    -   `GET`: Retrieves a single item by ID.
+    -   `DELETE`: Deletes a single item by ID.
+-   **Middleware:**
+    -   `validateObjectId`: Validates the object ID parameter.
+    -   `authenticateUser`: Authenticates the user before accessing item-related routes.
+    -   `validateItemInputs` (for `PUT`): Validates the input data before updating the item.
 
-#### Compare Password
+## Usage:
 
-passwordUtils.js
+-   The routes defined in this file handle item-related operations such as creation, retrieval, update, and deletion.
+-   Middleware functions ensure authentication, input validation, and object ID validation for secure and reliable operations.
 
-```js
-export async function comparePassword(password, hashedPassword) {
-    const isMatch = await bcrypt.compare(password, hashedPassword);
-    return isMatch;
-}
-```
+## Export:
 
-authController.js
+-   **`router`**: The Express router configured with item-related routes.
+-   **Usage:** Exported to be mounted in the main application file for routing item requests.
 
-```js
-import { hashPassword, comparePassword } from '../utils/passwordUtils.js';
+# Seller.Model.js
 
-const login = async (req, res) => {
-    // check if user exists
-    // check if password is correct
+This file defines the Mongoose model schema for sellers in the application.
 
-    const user = await User.findOne({ email: req.body.email });
+## Dependencies:
 
-    if (!user) throw new UnauthenticatedError('invalid credentials');
+-   **mongoose**: Used for MongoDB object modeling and schema creation.
+-   **bcryptjs**: Used for hashing passwords.
 
-    const isPasswordCorrect = await comparePassword(
-        req.body.password,
-        user.password
-    );
+## Schema:
 
-    if (!isPasswordCorrect)
-        throw new UnauthenticatedError('invalid credentials');
-    res.send('login route');
-};
-```
+### `sellerSchema`
 
-Refactor
+-   **Description:** Schema for seller details.
+-   **Fields:**
+    -   `username`: Username of the seller, must be unique.
+    -   `sellerRating`: Seller rating, ranging from 0 to 5.
+    -   `email`: Email address of the seller, must be unique.
+    -   `password`: Password of the seller's account.
+    -   `firstName`: First name of the seller.
+    -   `lastName`: Last name of the seller.
+    -   `phoneNumber`: Phone number of the seller, must be unique.
+    -   `profilePicture`: URL to the seller's profile picture.
+    -   `lastLoginDate`: Date of the seller's last login.
+    -   `accountRole`: Account role with predefined values (default: USER).
+-   **Options:**
+    -   `timestamps`: Enable timestamps to track creation and update.
+    -   `versionKey`: Disable version key.
+-   **Pre-Save Hook:** Hashes the password before saving the seller.
+-   **Usage:** Represents the schema for sellers in the application.
 
-```js
-const isValidUser = user && (await comparePassword(password, user.password));
-if (!isValidUser) throw new UnauthenticatedError('invalid credentials');
-```
+## Exported Model:
 
-#### JSON Web Token
+-   **`Seller`**: Model for the `sellerSchema`.
+-   **Usage:** Exported to be used in other parts of the application for CRUD operations on sellers.
 
-A JSON Web Token (JWT) is a compact and secure way of transmitting data between parties. It is often used to authenticate and authorize users in web applications and APIs. JWTs contain information about the user and additional metadata, and can be used to securely transmit this information
+---
 
-[Useful Resource](https://jwt.io/introduction)
+This documentation provides an overview of the schema defined in the `Seller.Model.js` file, including its fields, usage, and the exported model for interacting with the MongoDB database.
 
-```sh
-npm i jsonwebtoken@9.0.0
-```
+Sure! Below is the README.md documentation for the provided `Item.Model.js` file:
 
-utils/tokenUtils.js
+---
 
-```js
-import jwt from 'jsonwebtoken';
+# Item.Model.js
 
-export const createJWT = (payload) => {
-    const token = jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRES_IN,
-    });
-    return token;
-};
-```
+This file defines the Mongoose model schema for products/items in the application.
 
-JWT_SECRET represents the secret key used to sign the JWT. When creating a JWT, the payload (data) is signed with this secret key to generate a unique token. The secret key should be kept secure and should not be disclosed to unauthorized parties.
+## Dependencies:
 
-JWT_EXPIRES_IN specifies the expiration time for the JWT. It determines how long the token remains valid before it expires. The value of JWT_EXPIRES_IN is typically provided as a duration, such as "1h" for one hour or "7d" for seven days. Once the token expires, it is no longer considered valid and can't be used for authentication or authorization purposes.
+-   **mongoose**: Used for MongoDB object modeling and schema creation.
 
-These environment variables (JWT_SECRET and JWT_EXPIRES_IN) are read from the system environment during runtime, allowing for flexibility in configuration without modifying the code.
+## Schemas:
 
-authController.js
+### 1. `shippingOptionSchema`
 
-```js
-import { createJWT } from '../utils/tokenUtils.js';
+-   **Description:** Schema for shipping options with method and cost.
+-   **Fields:**
+    -   `method`: Shipping method with a maximum length of 50 characters.
+    -   `cost`: Shipping cost, must be non-negative.
+-   **Usage:** Used as a subdocument within the main product schema.
 
-const token = createJWT({ userId: user._id, role: user.role });
-console.log(token);
-```
+### 2. `productSchema`
 
-#### Test JWT (optional)
+-   **Description:** Main schema for product/item details.
+-   **Fields:**
+    -   `title`: Title of the product, required.
+    -   `description`: Description of the product, required.
+    -   `price`: Price of the product, must be non-negative.
+    -   `category`: Category of the product, required.
+    -   `condition`: Condition of the product with predefined options (default: USED).
+    -   `seller`: Reference to the seller of the product.
+    -   `location`: Location of the product, required.
+    -   `shippingOptions`: Array of shipping options using the `shippingOptionSchema`.
+    -   `images`: Array of image URLs, default empty array.
+    -   `quantity`: Quantity available, must be non-negative.
+    -   `availability`: Availability status of the product, defaults to true.
+    -   `attributes`: Attributes for the product (brand and color).
+    -   `listingDuration`: Duration of the product listing with predefined options (default: WEEK).
+    -   `sku`: Stock Keeping Unit identifier, required.
+    -   `endDate`: End date of the product listing, required.
+    -   `paymentOptions`: Payment options with predefined values, required.
+    -   `returnPolicy`: Return policy of the product, required with default value.
+    -   `sellerNotes`: Additional notes from the seller, optional.
+-   **Options:**
+    -   `timestamps`: Enable timestamps to track creation and update.
+    -   `versionKey`: Disable version key.
+-   **Usage:** Represents the schema for products/items in the application.
 
-[JWT](https://jwt.io/)
+## Exported Model:
 
-#### ENV Variables
+-   **`Product`**: Model for the `Product` schema.
+-   **Usage:** Exported to be used in other parts of the application for CRUD operations on products/items.
 
--   RESTART SERVER!!!!
+# validation.middleware.js
 
-.env
+This file contains middleware functions for request validation using the Express-validator library.
 
-```js
-JWT_SECRET=
-JWT_EXPIRES_IN=
-```
+## Middleware Functions:
 
-#### HTTP Only Cookie
+### 1. `validateObjectId`
 
-An HTTP-only cookie is a cookie that can't be accessed by JavaScript running in the browser. It is designed to help prevent cross-site scripting (XSS) attacks, which can be used to steal cookies and other sensitive information.
+-   **Description:** Middleware to validate if the provided parameter ID is a valid MongoDB ObjectId format.
+-   **Parameters:**
+    -   `req`: The Express request object.
+    -   `res`: The Express response object.
+    -   `next`: The Express next function to proceed to the next middleware.
+-   **Usage:** Used to validate request parameters containing MongoDB ObjectId.
 
-##### HTTP Only Cookie VS Local Storage
+### 2. `withValidationErrors`
 
-An HTTP-only cookie is a type of cookie that is designed to be inaccessible to JavaScript running in the browser. It is primarily used for authentication purposes and is a more secure way of storing sensitive information like user tokens. Local storage, on the other hand, is a browser-based storage mechanism that is accessible to JavaScript, and is used to store application data like preferences or user-generated content. While local storage is convenient, it is not a secure way of storing sensitive information as it can be accessed and modified by JavaScript running in the browser.
+-   **Description:** Higher-order middleware function that wraps around validation rules to handle validation errors.
+-   **Parameters:**
+    -   `rules`: An array of validation rules defined using Express-validator.
+-   **Usage:** Wraps around validation rules to handle validation errors and pass them to the error handling middleware.
 
-authControllers.js
+### 3. `validateItemInputs`
 
-```js
-const oneDay = 1000 * 60 * 60 * 24;
+-   **Description:** Middleware to validate item inputs based on specified validation rules.
+-   **Parameters:**
+    -   `req`: The Express request object.
+    -   `res`: The Express response object.
+    -   `next`: The Express next function to proceed to the next middleware.
+-   **Usage:** Used to validate item inputs before creating or updating items.
 
-res.cookie('token', token, {
-    httpOnly: true,
-    expires: new Date(Date.now() + oneDay),
-    secure: process.env.NODE_ENV === 'production',
-});
+### 4. `validateNewUserInputs`
 
-res.status(StatusCodes.CREATED).json({ msg: 'user logged in' });
-```
+-   **Description:** Middleware to validate new user inputs based on specified validation rules.
+-   **Parameters:**
+    -   `req`: The Express request object.
+    -   `res`: The Express response object.
+    -   `next`: The Express next function to proceed to the next middleware.
+-   **Usage:** Used to validate inputs when creating a new user account.
 
-```js
-const oneDay = 1000 * 60 * 60 * 24;
-```
+### 5. `validateUserLogin`
 
-This line defines a constant oneDay that represents the number of milliseconds in a day. This value is used later to set the expiration time for the cookie.
+-   **Description:** Middleware to validate user login inputs based on specified validation rules.
+-   **Parameters:**
+    -   `req`: The Express request object.
+    -   `res`: The Express response object.
+    -   `next`: The Express next function to proceed to the next middleware.
+-   **Usage:** Used to validate inputs during user login.
 
-```js
-res.cookie('token', token, {...});:
-```
+### 6. `authenticateUser`
 
-This line sets a cookie with the name "token" and a value of token, which is the JWT that was generated for the user. The ... represents an object containing additional options for the cookie.
+-   **Description:** Middleware to authenticate user requests using JWT tokens.
+-   **Parameters:**
+    -   `req`: The Express request object.
+    -   `res`: The Express response object.
+    -   `next`: The Express next function to proceed to the next middleware.
+-   **Usage:** Used to verify JWT tokens and authenticate user requests.
 
-httpOnly: true: This option makes the cookie inaccessible to JavaScript running in the browser. This helps to prevent cross-site scripting (XSS) attacks, which can be used to steal cookies and other sensitive information.
+### 7. `authorizePermissions`
 
-expires: new Date(Date.now() + oneDay): This option sets the expiration time for the cookie. In this case, the cookie will expire one day from the current time (as represented by Date.now() + oneDay).
+-   **Description:** Middleware to authorize user permissions based on specified roles.
+-   **Parameters:**
+    -   `roles`: An array of roles authorized to access the route.
+-   **Usage:** Used to ensure that only users with specific roles are authorized to access certain routes.
 
-secure: process.env.NODE_ENV === 'production': This option determines whether the cookie should be marked as secure or not. If the NODE_ENV environment variable is set to "production", then the cookie is marked as secure, which means it can only be transmitted over HTTPS. This helps to prevent man-in-the-middle (MITM) attacks, which can intercept and modify cookies that are transmitted over unsecured connections.
+# custom.errors.js
 
-jobsController.js
+This file contains custom error classes used for handling various HTTP error responses in the application.
 
-```js
-export const getAllJobs = async (req, res) => {
-    console.log(req);
-    const jobs = await Job.find({});
-    res.status(StatusCodes.OK).json({ jobs });
-};
-```
+## Classes:
 
-#### Clean DB
-
-#### Connect User and Job
-
-models/User.js
-
-```js
-const JobSchema = new mongoose.Schema(
-  {
-    ....
-    createdBy: {
-      type: mongoose.Types.ObjectId,
-      ref: 'User',
-    },
-  },
-  { timestamps: true }
-);
-```
+### 1. `CustomError`
 
-#### Auth Middleware
+-   **Description:** Base custom error class from which other specific error classes extend.
+-   **Constructor:**
+    -   Parameters:
+        -   `message`: The error message.
+        -   `statusCode`: The HTTP status code (default: 500 Internal Server Error).
 
-middleware/authMiddleware.js
+### 2. `NotFoundError`
 
-```js
-export const authenticateUser = async (req, res, next) => {
-    console.log('auth middleware');
-    next();
-};
-```
+-   **Description:** Error class for "Not Found" errors (404).
+-   **Extends:** `CustomError`
+-   **Constructor:**
+    -   Parameters:
+        -   `message`: The error message (default: "Not found").
 
-index.js
+### 3. `UnauthorizedError`
 
-```js
-import { authenticateUser } from './middleware/authMiddleware.js';
+-   **Description:** Error class for "Unauthorized" errors (401).
+-   **Extends:** `CustomError`
+-   **Constructor:**
+    -   Parameters:
+        -   `message`: The error message (default: "Unauthorized").
 
-app.use('/api/v1/jobs', authenticateUser, jobRouter);
-```
+### 4. `BadRequestError`
 
-##### Cookie Parser
+-   **Description:** Error class for "Bad Request" errors (400).
+-   **Extends:** `CustomError`
+-   **Constructor:**
+    -   Parameters:
+        -   `message`: The error message (default: "Bad request").
 
-[Cookie Parser](https://www.npmjs.com/package/cookie-parser)
+**Note:** Other specific error classes can be added similarly by extending the `CustomError` class and specifying the appropriate status code and error message in the constructor.
 
-```sh
-npm i cookie-parser@1.4.6
-```
+---
 
-index.js
+This documentation provides an overview of each custom error class along with its description, inheritance (if applicable), constructor parameters, and default error messages and status codes.
 
-```js
-import cookieParser from 'cookie-parser';
-app.use(cookieParser());
-```
+Sure, here's the README.md documentation for the `seller.controller.js` file:
 
-#### Access Token
+---
 
-authMiddleware.js
+# seller.controller.js
 
-```js
-import { UnauthenticatedError } from '../customErrors.js';
+This file contains controller functions for handling CRUD operations related to sellers in the application.
 
-export const authenticateUser = async (req, res, next) => {
-    const { token } = req.cookies;
-    if (!token) {
-        throw new UnauthenticatedError('authentication invalid');
-    }
-    next();
-};
-```
+## Functions:
 
-#### Verify Token
+### 1. `createSeller`
 
-utils/tokenUtils.js
+-   **Description:** Creates a new seller account.
+-   **HTTP Method:** POST
+-   **Endpoint:** `/api/sellers/register`
+-   **Request Body:** Seller account details
+-   **Response:**
+    -   Status: 201 Created
+    -   Body: An object containing the created seller details.
+-   **Functionality:**
+    -   Determines the account role based on whether it's the first account or not.
+    -   Creates the seller account in the database.
+    -   Returns success response with selected seller details.
 
-```js
-export const verifyJWT = (token) => {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    return decoded;
-};
-```
+### 2. `loginSeller`
 
-authMiddleware.js
-
-```js
-import { UnauthenticatedError } from '../customErrors.js';
-import { verifyJWT } from '../utils/tokenUtils.js';
-
-export const authenticateUser = async (req, res, next) => {
-    const { token } = req.cookies;
-    if (!token) {
-        throw new UnauthenticatedError('authentication invalid');
-    }
-
-    try {
-        const { userId, role } = verifyJWT(token);
-        req.user = { userId, role };
-        next();
-    } catch (error) {
-        throw new UnauthenticatedError('authentication invalid');
-    }
-};
-```
+-   **Description:** Logs in a seller.
+-   **HTTP Method:** POST
+-   **Endpoint:** `/api/sellers/login`
+-   **Request Body:** Seller login credentials
+-   **Response:**
+    -   Status: 200 OK
+    -   Body: An object containing the seller details and a JWT token.
+-   **Functionality:**
+    -   Finds the seller by email.
+    -   Compares passwords.
+    -   Generates a JWT token with seller ID and account role.
+    -   Sets cookie with the JWT token.
 
-jobController.js
-
-```js
-export const getAllJobs = async (req, res) => {
-    console.log(req.user);
-    const jobs = await Job.find({ createdBy: req.user.userId });
-    res.status(StatusCodes.OK).json({ jobs });
-};
-```
+### 3. `logoutSeller`
 
-#### Refactor Create Job
+-   **Description:** Logs out a seller.
+-   **HTTP Method:** POST
+-   **Endpoint:** `/api/sellers/logout`
+-   **Response:**
+    -   Status: 200 OK
+    -   Body: A success message indicating that the user has been logged out.
 
-jobController.js
+### 4. `getAllSellers`
 
-```js
-export const createJob = async (req, res) => {
-    req.body.createdBy = req.user.userId;
-    const job = await Job.create(req.body);
-    res.status(StatusCodes.CREATED).json({ job });
-};
-```
+-   **Description:** Retrieves all sellers from the database.
+-   **HTTP Method:** GET
+-   **Endpoint:** `/api/sellers`
+-   **Response:**
+    -   Status: 200 OK
+    -   Body: An object containing the total number of sellers and an array of sellers.
 
-#### Check Permissions
-
-validationMiddleware.js
-
-```js
-const withValidationErrors = (validateValues) => {
-  return [
-    validateValues,
-    (req, res, next) => {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-       ...
-        if (errorMessages[0].startsWith('not authorized')) {
-          throw new UnauthorizedError('not authorized to access this route');
-        }
-
-        throw new BadRequestError(errorMessages);
-      }
-      next();
-    },
-  ];
-};
-```
+### 5. `getSingleSeller`
 
-```js
-import {
-    BadRequestError,
-    NotFoundError,
-    UnauthorizedError,
-} from '../errors/customErrors.js';
-
-export const validateIdParam = withValidationErrors([
-    param('id').custom(async (value, { req }) => {
-        const isValidMongoId = mongoose.Types.ObjectId.isValid(value);
-        if (!isValidMongoId) throw new BadRequestError('invalid MongoDB id');
-        const job = await Job.findById(value);
-        if (!job) throw new NotFoundError(`no job with id ${value}`);
-        const isAdmin = req.user.role === 'admin';
-        const isOwner = req.user.userId === job.createdBy.toString();
-        if (!isAdmin && !isOwner)
-            throw UnauthorizedError('not authorized to access this route');
-    }),
-]);
-```
+-   **Description:** Retrieves a single seller by ID.
+-   **HTTP Method:** GET
+-   **Endpoint:** `/api/sellers/:id`
+-   **Response:**
+    -   Status: 200 OK
+    -   Body: An object containing the seller details.
+-   **Error Handling:**
+    -   Throws a NotFoundError if the seller with the specified ID is not found.
 
-#### Logout User
-
-controllers/authController.js
-
-```js
-const logout = (req, res) => {
-    res.cookie('token', 'logout', {
-        httpOnly: true,
-        expires: new Date(Date.now()),
-    });
-    res.status(StatusCodes.OK).json({ msg: 'user logged out!' });
-};
-
-//////another approach
-
-export const logoutSeller = async (req, res) => {
-    // Clear the token by setting its expiration date to a date in the past
-    res.clearCookie('token');
-
-    // Return success response
-    return res
-        .status(StatusCodes.OK)
-        .json({ msg: 'User logged out successfully' });
-};
-```
+### 6. `getCurrentUser`
 
-routes/authRouter.js
+-   **Description:** Retrieves details of the current logged-in seller.
+-   **HTTP Method:** GET
+-   **Endpoint:** `/api/sellers/current`
+-   **Response:**
+    -   Status: 200 OK
+    -   Body: An object containing the current seller's details.
+-   **Error Handling:**
+    -   Throws a NotFoundError if the current seller is not found.
 
-```js
-import { Router } from 'express';
-const router = Router();
-import { logout } from '../controllers/authController.js';
+### 7. `updateCurrentUser`
 
-router.get('/logout', logout);
+-   **Description:** Updates details of the current logged-in seller.
+-   **HTTP Method:** PUT
+-   **Endpoint:** `/api/sellers/current`
+-   **Request Body:** Updated seller details
+-   **Response:**
+    -   Status: 200 OK
+    -   Body: An object containing the updated seller details.
+-   **Functionality:**
+    -   Finds the seller by ID.
+    -   Updates the seller with the provided and changed fields.
+    -   Returns success response with the updated seller details.
+-   **Error Handling:**
+    -   Throws a NotFoundError if the current seller is not found.
 
-export default router;
-```
+### 8. `getApplicationStats`
 
-#### User Routes
+-   **Description:** Retrieves application statistics (for admin).
+-   **HTTP Method:** GET
+-   **Endpoint:** `/api/sellers/stats`
+-   **Response:**
+    -   Status: 200 OK
+    -   Body: An object containing the total number of sellers and products.
+-   **Functionality:**
+    -   Counts the total number of sellers and products in the database.
 
-controllers/userController.js
+---
 
-```js
-import { StatusCodes } from 'http-status-codes';
-import User from '../models/User.js';
-import Job from '../models/Job.js';
+This documentation provides an overview of each controller function along with its description, HTTP method, endpoint, request body (if applicable), response details, functionality, and error handling.
 
-export const getCurrentUser = async (req, res) => {
-    res.status(StatusCodes.OK).json({ msg: 'get current user' });
-};
+Sure, below is the README.md documentation for the `items.controller.js` file:
 
-export const getApplicationStats = async (req, res) => {
-    res.status(StatusCodes.OK).json({ msg: 'application stats' });
-};
+---
 
-export const updateUser = async (req, res) => {
-    res.status(StatusCodes.OK).json({ msg: 'update user' });
-};
-```
+# items.controller.js
 
-routes/userRouter.js
-
-```js
-import { Router } from 'express';
-const router = Router();
-
-import {
-    getCurrentUser,
-    getApplicationStats,
-    updateUser,
-} from '../controllers/userController.js';
-
-router.get('/current-user', getCurrentUser);
-router.get('/admin/app-stats', getApplicationStats);
-router.patch('/update-user', updateUser);
-export default router;
-```
+This file contains controller functions for handling CRUD operations related to items in the application.
 
-server.js
+## Functions:
 
-```js
-import userRouter from './routers/userRouter.js';
+### 1. `getAllItems`
 
-app.use('/api/v1/users', authenticateUser, userRouter);
-```
+-   **Description:** Retrieves all items from the database.
+-   **HTTP Method:** GET
+-   **Endpoint:** `/api/items`
+-   **Response:**
+    -   Status: 200 OK
+    -   Body: An object containing the total number of items and an array of items.
 
-#### Get Current User
+### 2. `getSingleItem`
 
-```js
-export const getCurrentUser = async (req, res) => {
-    const user = await User.findOne({ _id: req.user.userId });
-    res.status(StatusCodes.OK).json({ user });
-};
-```
+-   **Description:** Retrieves a single item by its ID.
+-   **HTTP Method:** GET
+-   **Endpoint:** `/api/items/:id`
+-   **Response:**
+    -   Status: 200 OK
+    -   Body: An object containing the item details.
+-   **Error Handling:**
+    -   Throws a NotFoundError if the item with the specified ID is not found.
 
-<!--
-#### Remove Password
+### 3. `updateSingleItem`
 
-models/UserModel.js
+-   **Description:** Updates a single item by its ID.
+-   **HTTP Method:** PUT
+-   **Endpoint:** `/api/items/:id`
+-   **Request Body:** Updated item data
+-   **Response:**
+    -   Status: 200 OK
+    -   Body: An object containing the updated item details.
+-   **Error Handling:**
+    -   Throws a NotFoundError if the item with the specified ID is not found.
 
-```js
-UserSchema.methods.toJSON = function () {
-    var obj = this.toObject();
-    delete obj.password;
-    return obj;
-};
-```
+### 4. `deleteSingleItem`
 
-```js
-export const getCurrentUser = async (req, res) => {
-    const user = await User.findOne({ _id: req.user.userId });
-    const userWithoutPassword = user.toJSON();
-    res.status(StatusCodes.OK).json({ user: userWithoutPassword });
-};
-``` -->
-
-#### Update User
-
-middleware/validationMiddleware.js
-
-```js
-const validateUpdateUserInput = withValidationErrors([
-    body('name').notEmpty().withMessage('name is required'),
-    body('email')
-        .notEmpty()
-        .withMessage('email is required')
-        .isEmail()
-        .withMessage('invalid email format')
-        .custom(async (email, { req }) => {
-            const user = await User.findOne({ email });
-            if (user && user._id.toString() !== req.user.userId) {
-                throw new Error('email already exists');
-            }
-        }),
-    body('lastName').notEmpty().withMessage('last name is required'),
-    body('location').notEmpty().withMessage('location is required'),
-]);
-```
+-   **Description:** Deletes a single item by its ID.
+-   **HTTP Method:** DELETE
+-   **Endpoint:** `/api/items/:id`
+-   **Response:**
+    -   Status: 200 OK
+    -   Body: An object confirming the deletion of the item.
+-   **Error Handling:**
+    -   Throws a NotFoundError if the item with the specified ID is not found.
+    -   Throws an UnauthorizedError if the user is not authorized to delete the item.
 
-```js
-export const updateUser = async (req, res) => {
-    const updatedUser = await User.findByIdAndUpdate(req.user.userId, req.body);
-    res.status(StatusCodes.OK).json({ msg: 'user updated' });
-};
-```
+### 5. `createItem`
 
-```json
-{
-    "name": "john",
-    "email": "john@gmail.com",
-    "lastName": "smith",
-    "location": "florida"
-}
-```
+-   **Description:** Creates a new item.
+-   **HTTP Method:** POST
+-   **Endpoint:** `/api/items`
+-   **Request Body:** Item data
+-   **Response:**
+    -   Status: 201 Created
+    -   Body: An object containing the created item details.
 
-#### Application Stats
-
-```js
-export const getApplicationStats = async (req, res) => {
-    const users = await User.countDocuments();
-    const jobs = await Job.countDocuments();
-    res.status(StatusCodes.OK).json({ users, jobs });
-};
-```
+### 6. `getCurrentUserItems`
 
-```js
-export const authorizePermissions = (...roles) => {
-    return (req, res, next) => {
-        if (!roles.includes(req.user.role)) {
-            throw new UnauthorizedError('Unauthorized to access this route');
-        }
-        next();
-    };
-};
-```
+-   **Description:** Retrieves items owned by the current user.
+-   **HTTP Method:** GET
+-   **Endpoint:** `/api/items/user`
+-   **Response:**
+    -   Status: 200 OK
+    -   Body: An object containing the total number of items and an array of items owned by the current user.
 
-```js
-import { authorizePermissions } from '../middleware/authMiddleware.js';
+---
 
-router.get('/admin/app-stats', [
-    authorizePermissions('admin'),
-    getApplicationStats,
-]);
-```
+This documentation provides an overview of each controller function along with its description, HTTP method, endpoint, request body (if applicable), response details, and error handling.

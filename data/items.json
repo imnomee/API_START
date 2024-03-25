@@ -4,15 +4,9 @@
         "description": "High-performance smartphone with advanced features.",
         "price": 599.99,
         "category": "Electronics",
-        "condition": "New",
-        "seller": {
-            "username": "electronics_store",
-            "sellerRating": 4.8
-        },
-        "location": {
-            "city": "Tech City",
-            "country": "Digitalland"
-        },
+        "condition": "new",
+        "location": "Tech City",
+        "listingDuration": "week",
         "shippingOptions": [
             {
                 "method": "Standard Shipping",
@@ -37,7 +31,7 @@
         "sku": "PHONE123",
         "listingDate": "2024-03-22T08:00:00.000Z",
         "endDate": "2024-04-22T08:00:00.000Z",
-        "paymentOptions": ["Credit Card", "PayPal"],
+        "paymentOptions": ["credit_card", "paypal"],
         "returnPolicy": "30-day return policy. Buyer pays return shipping.",
         "sellerNotes": "Limited time offer: Free wireless earbuds included."
     },
@@ -46,15 +40,10 @@
         "description": "Ultra HD smart television with built-in streaming apps.",
         "price": 899.99,
         "category": "Electronics",
-        "condition": "New",
-        "seller": {
-            "username": "electronics_store",
-            "sellerRating": 4.8
-        },
-        "location": {
-            "city": "Tech City",
-            "country": "Digitalland"
-        },
+        "condition": "new",
+
+        "listingDuration": "week",
+        "location": "Tech City",
         "shippingOptions": [
             {
                 "method": "Standard Shipping",
@@ -74,12 +63,13 @@
         "attributes": {
             "brand": "TechVision",
             "screenSize": "55 inches",
-            "resolution": "4K"
+            "resolution": "4K",
+            "color": "yellow"
         },
         "sku": "TV456",
         "listingDate": "2024-03-22T08:00:00.000Z",
         "endDate": "2024-04-22T08:00:00.000Z",
-        "paymentOptions": ["Credit Card", "PayPal"],
+        "paymentOptions": ["easypaisa", "bank"],
         "returnPolicy": "30-day return policy. Buyer pays return shipping.",
         "sellerNotes": "Limited stock available. Order now!"
     }
